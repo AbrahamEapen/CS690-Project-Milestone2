@@ -492,9 +492,9 @@ artifact:  docs/design/S-3.md §3, §4, §6, §7, §8; backlog/backlog.md (AC-21
            evidence/evidence_log.md (Q-5, Q-6, Q-9 settled); commit a0710e9
 tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-11
 prompts:   settle OQ-1..OQ-4 and the named settings; prompts/m2_session_prompts.md items 2, 5
-review:    Abraham picked each decision from the agent's options. He rejected the agent's
+review:    Abraham picked each decision from the agent's options. Abraham rejected the agent's
            suggestion to break ties by application time, because it needed a new applied_at
-           field, and chose application_id ascending instead. He also rejected the agent's
+           field, and chose application_id ascending instead. Abraham also rejected the agent's
            recommendation to add no synonyms, and chose the two INT-03:P03 pairs. The design
            doc was changed first, then the criteria; the tests follow in 3b. The non-goal
            "no synonym matching" in §3 contradicted D7, so it was rewritten.
