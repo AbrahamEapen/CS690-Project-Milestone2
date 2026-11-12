@@ -464,3 +464,62 @@ evidence:  Turn-in instructions (GitHub repository URL); Deliverable 6e
 risk:      The commit that adds this entry is not named here. The repository is public:
            the redacted interview notes are visible to anyone, and INT-03's consent
            ("used only for our report") has not been re-confirmed for public use.
+
+---
+
+# Milestone 2 (story S-3)
+
+From Milestone 2 on, the repository is https://github.com/AbrahamEapen/CS690-Project-Milestone2.
+SHAs before c17dcad are in the Milestone 1 repository, ap3478/CS690-Project.
+
+## Entry 25
+artifact:  Repository start, commit c17dcad (Milestone 1 files copied without history;
+           .gitignore extended with .env, .coverage, htmlcov/, mutants/, .hypothesis/)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-11
+prompts:   handout review; settling repo items 1–8; the three setup items; push;
+           prompts/m2_session_prompts.md items 1–4
+review:    Abraham chose a new repository over continuing the old one. The agent checked the
+           staged files for .env, .venv and caches before committing and found none. The HTTPS
+           remote had no credentials, so it was switched to SSH for the same repository.
+checks:    python -m pytest -q in a new .venv → 4 passed, 3 skipped; git push -u origin main →
+           "[new branch] main -> main"
+evidence:  Milestone 2 turn-in instructions
+risk:      The Milestone 1 SHAs cited in the 1a follow-up live in a different repository; the
+           grader must open ap3478/CS690-Project to check them.
+
+## Entry 26
+artifact:  docs/design/S-3.md §3, §4, §6, §7, §8; backlog/backlog.md (AC-21..AC-23, S-15);
+           evidence/evidence_log.md (Q-5, Q-6, Q-9 settled); commit a0710e9
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-11
+prompts:   settle OQ-1..OQ-4 and the named settings; prompts/m2_session_prompts.md items 2, 5
+review:    Abraham picked each decision from the agent's options. He rejected the agent's
+           suggestion to break ties by application time, because it needed a new applied_at
+           field, and chose application_id ascending instead. He also rejected the agent's
+           recommendation to add no synonyms, and chose the two INT-03:P03 pairs. The design
+           doc was changed first, then the criteria; the tests follow in 3b. The non-goal
+           "no synonym matching" in §3 contradicted D7, so it was rewritten.
+checks:    grep -n "OQ-" docs/design/S-3.md → every OQ line replaced by a decision;
+           python -m pytest -q → 4 passed, 3 skipped (no code changed)
+evidence:  S-3; OQ-1..OQ-4; Q-5, Q-6, Q-9; INT-03:P03; INT-04:P06–P07
+risk:      D2, D6 and D8 are team decisions, not interviewee answers. No recruiter has
+           confirmed that ordering ties by application_id, or hiding Rejected applicants,
+           matches how they work.
+
+## Entry 27
+artifact:  docs/design/S-3-gap-check-2.md; S-3.md §5 and §8 (D1, D4, D9–D13); commits
+           e44da99, 7be1fde
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-11, fresh general-purpose
+           subagent for the gap check (no conversation context)
+prompts:   prompts/s3_gap_check_2_prompt.md (handout prompt, verbatim)
+review:    The subagent returned 37 questions, saved verbatim. The main agent drafted marks:
+           30 real gaps and 7 answered. Abraham decided the three with real alternatives:
+           validate the ranking store on set rather than at ranking time (this removes a
+           500/422 path, Q26), reject any non-int fit_score (Q10), and reject non-str skills
+           but leave application_id unchecked (Q9, Q11). The agent's draft answer to Q21
+           (assume the caller pre-filters by posting) was changed so that the store filters
+           by posting_id itself.
+checks:    every row in the marks table names a section or decision that exists in S-3.md
+           (checked by grep for D9..D13)
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23
+risk:      The 30 resolutions were checked against the doc text, not by a second gap-check
+           run, so new gaps could come from D9–D13 themselves.
