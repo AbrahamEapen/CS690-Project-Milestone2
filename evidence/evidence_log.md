@@ -58,8 +58,8 @@ Owners: **AP** = Aditya Pothuri (Project Lead), **KV** = Ketan Verma (Tech Lead)
 | Q-2 | **Disagreement:** INT-04:P10 says internal candidates can track progress in the system, but INT-05:P08 says the portal showed only "Submitted" the whole time. Which is typical, and what exactly can applicants see today? | INT-04:P10, INT-05:P08 | Open | AP |
 | Q-3 | What happens to an application at Offer when the offer is declined or rescinded: does it move to Rejected, to a new stage, or stay at Offer? | Team | Open | AP |
 | Q-4 | Who can set an application to Withdrawn (the applicant, the recruiter, or both), and can a withdrawn application be reopened? | INT-02:P06, INT-05:P15 | Open | AE |
-| Q-5 | Can a recruiter override the "Does not meet minimum" flag for an applicant with transferable experience, and should an overridden applicant then rank with those who meet the minimum? | INT-04:P06, INT-04:P07 | Open | KV |
-| Q-6 | How should applicants with equal fit scores be ordered in the ranked list? | Team | Open | KV |
+| Q-5 | Can a recruiter override the "Does not meet minimum" flag for an applicant with transferable experience, and should an overridden applicant then rank with those who meet the minimum? | INT-04:P06, INT-04:P07 | Settled: S-3 D6 (M2, team decision) | KV |
+| Q-6 | How should applicants with equal fit scores be ordered in the ranked list? | Team | Settled: S-3 D2 (M2, team decision) | KV |
 | Q-7 | At which stage, if any, should the system tell the applicant's current manager, and who triggers it? | INT-04:P12, INT-05:P10 | Open | AP |
 | Q-8 | Who approves a new hiring tool at our target companies, and is SSO required before go-live? | INT-02:P05 | Open | KV |
-| Q-9 | Should a skill synonym count as a match for a required skill (for example "Postgres" for "PostgreSQL", or "Word" for "Microsoft Word")? | INT-03:P03 | Open | KV |
+| Q-9 | Should a skill synonym count as a match for a required skill (for example "Postgres" for "PostgreSQL", or "Word" for "Microsoft Word")? | INT-03:P03 | Settled: S-3 D7 (M2, INT-03:P03 + team decision) | KV |

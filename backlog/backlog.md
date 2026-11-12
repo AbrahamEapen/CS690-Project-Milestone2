@@ -27,6 +27,7 @@ Named settings stand for values the interviews did not settle. No criterion pick
 | S-12 | As an **HR recruiter**, I want a short written explanation of each applicant's fit, so that I can pass the reasoning to the hiring manager. | **Assumption**, rests on A-7. Clarifying question: *"The last time you wrote up why a candidate fit a role, what did you include, who read it, and how long did it take?"* |
 | S-13 | As an **internal applicant**, I want a rejection notice that tells me the stage I reached and whom to ask for feedback, so that I can learn why without relying on knowing the hiring manager. | E-3, E-4 |
 | S-14 | As an **HR recruiter**, I want text extracted from resumes uploaded as scanned images (JPEG or PNG), so that I don't have to send applicants or HR back for a file in a proper format. | E-19. Rests also on A-6 (English documents). |
+| S-15 | As an **HR recruiter**, I want to override the "Does not meet minimum" flag for an applicant with transferable experience, so that a borderline candidate the hiring manager wants is reviewed with the qualified group. | E-13, E-14. Split out of S-3 in Milestone 2 (S-3 D6, settles Q-5 for S-3). |
 
 ## 4c. INVEST check
 
@@ -48,6 +49,7 @@ P = pass. Each fail names the specific problem.
 | S-12 | **Fail:** depends on S-4. | P | **Fail:** value rests only on A-7; no interview supports it. | P | P | **Fail:** "a good explanation" has no objective check beyond length and named skills. |
 | S-13 | **Fail:** depends on S-1 (needs the Rejected move). | P | P | P | P | P |
 | S-14 | **Fail:** depends on S-8's upload path. | P | P | **Fail:** OCR accuracy on phone photos is unknown until we test it on sample scans. | P | P |
+| S-15 | **Fail:** depends on S-3's ranked list. | P | **Fail:** where an overridden applicant ranks is still a team choice. | P | P | P |
 
 ## 4d. Acceptance criteria
 
@@ -73,6 +75,9 @@ P = pass. Each fail names the specific problem.
 | AC-18 | S-12 | an application has a fit score with at least one matched and one missing required skill | the recruiter opens it | a written explanation of at most `EXPLANATION_MAX_WORDS` words names at least one matched and one missing required skill |
 | AC-19 | S-13 | an application is at Interview | the recruiter moves it to Rejected | the applicant's view shows the label `APPLICANT_STAGE_LABELS["Interview"]` as the last stage reached and a named contact for feedback |
 | AC-20 | S-14 | an applicant uploads a PNG scan of a resume whose text includes "PostgreSQL" | the recruiter opens the application | the application's extracted text includes "PostgreSQL" |
+| AC-21 | S-3 | posting P requires {PostgreSQL}; applicant A has {Postgres} with fit score 60; applicant B has {MySQL} with fit score 90 | the recruiter opens the ranked list for P | A is listed above B; A shows no flag, and B shows the flag "Does not meet minimum" (S-3 D7) |
+| AC-22 | S-3 | posting P requires {Java}; applications "b" and "a" both have Java with fit score 70 | the recruiter opens the ranked list for P | the list shows "a" then "b", with no flags (S-3 D2) |
+| AC-23 | S-3 | posting P requires {Java}; application X has Java with fit score 50 at stage Applied; application Y has Java with fit score 80 and has been moved to Rejected; application Z has no fit score yet | the recruiter requests `GET /postings/P/ranked` | the response is 200 and lists only X, unflagged (S-3 D8) |
 
 Q entries are not quietly settled. AC-2 and AC-4 apply A-2 and A-3, which are explicit, logged assumptions. AC-16 records Withdrawn separately from Rejected, which E-6 supports; it leaves open who sets it and whether it can be reopened (Q-4). No criterion moves an application out of Offer (Q-3), orders tied scores (Q-6), overrides a flag (Q-5), matches synonyms (Q-9), or picks a stage at which a manager is told (Q-7). AC-10 covers only submission, which INT-04:P12 supports.
 
@@ -95,3 +100,4 @@ Q entries are not quietly settled. AC-2 and AC-4 apply A-2 and A-3, which are ex
 | 12 | S-13 | Below the line: needs a feedback process the interviews did not describe. |
 | 13 | S-11 | Below the line: useful (E-15), but S-3's ranked list covers most of the need. |
 | 14 | S-12 | Below the line: rests only on A-7, so it moved below the line ahead of the proposal's Milestone 2 accuracy check (see Deliverable 1). |
+| 15 | S-15 | Below the line: split out of S-3 in Milestone 2 (S-3 D6); placement of an overridden applicant still needs a team decision. |
