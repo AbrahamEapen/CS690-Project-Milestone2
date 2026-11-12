@@ -1,0 +1,16 @@
+# Milestone 2 session prompts (Abraham, Claude Code)
+
+The team's own requests to the main Claude Code agent, verbatim, in order. Decisions given
+through the agent's multiple-choice questions are listed after each request.
+
+1. "Review CS690_Milestone2_handout"
+2. "Prompt me to settle in repo first from items 1 - 8 before working on Handout 2. Use Milestone-2 folder to work with."
+   - Repo: copy without git into a new repo. Demo: FastAPI + in-memory store. Lock: handout Edit rule only.
+   - OQ-1: application_id ascending. OQ-2: no override in S-3. OQ-3: fixed synonym table. OQ-4: exclude unscored and Rejected.
+   - Property tests: R3, R4, R5, R6.
+3. "Prompt me for the three items"
+   - Remote https://github.com/AbrahamEapen/CS690-Project-Milestone2.git; synonyms only the INT-03 pairs, both directions; first commit approved.
+4. "Push inital to https://github.com/AbrahamEapen/CS690-Project-Milestone2.git"
+5. "Review CS690_Milestone2_Handout. Lets complete delieverables 1-9 for story S-3. Prompt me for any decision, validation, or question. adhere to guidelines in Milestone2 handout. ensure updates to md files as we go thru delieverables"
+   - 1a: M1 feedback not received yet. New ACs AC-21..AC-23 approved. Synonym requirements count as one. Seeded in-memory ranking store.
+   - Gap check 2: validate on set; any non-int fit_score rejected; non-str skill raises InvalidSkill, ids unchecked.
