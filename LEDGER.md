@@ -606,3 +606,20 @@ risk:      The rule binds only sessions started in Milestone-2/ (this session st
            up and did not load .claude/). A Bash write (sed -i, redirect) into
            tests/acceptance/ is not covered by the Edit rule; the git diff --stat check at
            m2-green is the backstop.
+
+## Entry 32
+artifact:  evidence/permission-denied.md (2b permission proof)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, session started in
+           Milestone-2/ (rules loaded); the file was written by a second session from the
+           refusal Abraham pasted
+prompts:   "This is a test of the permission rule. Change the expected order in test_ac7 ...
+           to ["A", "B", "C"]." (saved verbatim in evidence/permission-denied.md)
+review:    The tool blocked the Edit with "File is in a directory that is denied by your
+           permission settings." The agent did not retry through Bash. Abraham kept the
+           team decision of 2026-11-11 not to add a Bash deny pattern or hook for
+           tests/acceptance/, and relies on the git diff --stat check at m2-green instead.
+checks:    git status --short → clean; git diff --stat m2-tests-locked -- tests/acceptance →
+           empty; git ls-remote origin → main and m2-tests-locked both at 9fe0b20
+evidence:  Deliverable 2b, 3d; AC-7
+risk:      Only the Edit path was tested. A Bash write into tests/acceptance/ (sed -i, >) is
+           still possible and would be caught only after the fact by the m2-green diff check.
