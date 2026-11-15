@@ -1,0 +1,6 @@
+# Test configuration for CS690 Milestone 2 (S-3). pytest settings stay in pytest.ini.
+
+[tool.coverage.report]
+# Deliverable 5d: the README test command fails below 80 percent coverage of the story code.
+fail_under = 80
+show_missing = true

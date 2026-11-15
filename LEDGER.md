@@ -986,3 +986,23 @@ evidence:  S-3; D9, D10, D11, D13; Deliverable 4e
 risk:      validate_fit_score and validate_skills are now public names that the design doc does
            not list in §4, and the plan text still calls them private. seed_demo still has no
            automated test, so the demo comparison was a one-off check by hand.
+
+## Entry 50
+artifact:  README.md and AGENTS.md test command; pyproject.toml ([tool.coverage.report]
+           fail_under = 80) (5d set-up)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session; it
+           reviewed the 4e refactor and made the change Abraham chose)
+prompts:   prompts/m2_session_prompts.md item 14 (review refactor; decide coverage and mutation scope)
+review:    Refactor e6270d0 reviewed: demo output at m2-green and after the refactor is
+           byte-for-byte identical (cmp over all 7 postings and the AC-8 pipeline), no
+           _validate_ names are left in src/, and tests are unchanged. For 5d, --cov=jobsboard also
+           counted S-1's pipeline.py, so S-3 code could fall below 80% while the total stayed
+           above it. Abraham chose to gate the story files only (ranking, ranking_store, api).
+           For 5e, Abraham chose to mutate ranking.py and ranking_store.py, but not api.py.
+checks:    python -m pytest --cov=jobsboard.ranking --cov=jobsboard.ranking_store
+           --cov=jobsboard.api --cov-branch --cov-report=term-missing --cov-fail-under=80 →
+           100 passed, 89.66%; python -m pytest -q → 100 passed (no gate without --cov)
+evidence:  Deliverable 4e, 5d, 5e
+risk:      S-1's pipeline.py is no longer under the coverage gate; a drop there would go
+           unnoticed. api.py is gated but not mutated, so the strength of the route's tests is
+           measured only by coverage.

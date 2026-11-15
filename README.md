@@ -23,10 +23,10 @@ python -m pip install -r requirements.txt
 ## Run all the tests (one command, with the coverage gate)
 
 ```bash
-python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing --cov-fail-under=80
+python -m pytest --cov=jobsboard.ranking --cov=jobsboard.ranking_store --cov=jobsboard.api --cov-branch --cov-report=term-missing --cov-fail-under=80
 ```
 
-The command fails if line coverage of `src/jobsboard` drops below 80 percent. `python -m pytest -q` runs the same tests without coverage.
+The command fails if coverage of the S-3 story code (`ranking.py`, `ranking_store.py`, `api.py`) drops below 80 percent; the threshold is also set in `pyproject.toml`. `python -m pytest -q` runs the same tests without coverage.
 
 ## Run the API locally (optional)
 

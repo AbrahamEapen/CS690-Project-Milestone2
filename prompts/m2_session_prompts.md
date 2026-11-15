@@ -29,3 +29,5 @@ through the agent's multiple-choice questions are listed after each request.
 12. "Task 7b diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
    - Add demo-empty (200 []) to D13 and the plan for the 4f empty-state screenshot.
 13. "Task 8 diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
+14. "4e ,refactor, diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
+   - Coverage gate: story files only (ranking, ranking_store, api). Mutation: ranking.py + ranking_store.py.

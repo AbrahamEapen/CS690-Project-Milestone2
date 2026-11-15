@@ -12,7 +12,7 @@ These rules apply to every AI coding session in this repository. Claude Code rea
 python3 -m venv .venv && source .venv/bin/activate      # install
 python -m pip install -r requirements.txt
 JOBSBOARD_DEMO=1 uvicorn jobsboard.api:app --app-dir src # run the app (http://127.0.0.1:8000/docs)
-python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing --cov-fail-under=80   # test + coverage gate
+python -m pytest --cov=jobsboard.ranking --cov=jobsboard.ranking_store --cov=jobsboard.api --cov-branch --cov-report=term-missing --cov-fail-under=80   # test + coverage gate
 mutmut run && mutmut results                             # mutation testing (Linux/WSL)
 ```
 `python -m pytest -q` runs the tests without the coverage gate. Run the full test command before reporting any task as done, and report its exact output.
