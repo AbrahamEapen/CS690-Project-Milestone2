@@ -86,7 +86,11 @@ The report found no expected value that does not follow from its criterion and n
 
 ## 4a. Changes to the plan
 
-_TODO (Deliverable 4a)._
+The agent wrote the plan in plan mode (`prompts/s3_plan_prompt.md`). Abraham read it before any code was written. The corrected plan is `docs/plans/S-3-plan.md`, where the removed text is crossed out.
+
+1. **Validation moved out of Task 1 into its own Task 7, tests first.** Task 1 was meant to make AC-7 pass, but the agent put all the §5/D3/D10 input validation into it. AC-7 asks for none of that and no acceptance test checks it, so Task 1 was not bounded. Validation is now Task 7, and `test-writer` drafts its unit tests before any code.
+2. **Reviewer delegation moved from the last task to Task 5.** Task 5 is the first to touch the store, the API and S-1 data (R6, D12). A finding there is cheaper to fix than after the demo task. The headless review in Deliverable 6 still covers every file at the end.
+3. **The plan's open points went into the design doc first** (3d6a2e9). D10's "skills in `sorted()` order" fails on mixed types, so the team wrote a two-pass rule, and the plan's two assumptions became decisions in D10. The plan also called the demo's use of `_put` a "team decision" before the team had made one. Abraham then chose it and recorded it in D13.
 
 ## 5. Test strength
 

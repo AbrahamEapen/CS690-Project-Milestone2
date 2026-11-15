@@ -20,3 +20,5 @@ through the agent's multiple-choice questions are listed after each request.
    - Checkpoints: stop at each review the handout requires. Team roles: Abraham led all four areas.
 8. "I have completed step. review and lets proceed to next step" (after the test-writer audit ran in a session started from Milestone-2/)
    - AC-8 finding: fix the test to go through GET /postings/P/ranked and check the whole pipeline (team commit). Hand recomputation of all six expected values: confirmed by Abraham.
+9. "The S-3 plan is saved to docs/plans/S-3-plan.md. It isn't committed yet. Review and prompt me for next steps"
+   - Validation: own task (Task 7), test-writer drafts unit tests first. Reviewer: after Task 5. Demo seed: store._put, recorded in D13. D10 two-pass wording: approved.

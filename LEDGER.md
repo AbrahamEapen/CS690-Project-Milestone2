@@ -643,3 +643,22 @@ evidence:  S-3 §5, D3, D10, D13
 risk:      No acceptance test covers validation; the two-pass order is checked only by the
            unit tests planned for Task 7. The _put call couples the demo to a private S-1
            method that S-1 could rename.
+
+## Entry 34
+artifact:  docs/plans/S-3-plan.md (corrected plan); MILESTONE2.md §4a
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, plan mode (plan written
+           in the Milestone-2/ session; corrections applied by a second session)
+prompts:   prompts/s3_plan_prompt.md (write the plan); prompts/m2_session_prompts.md item 9
+           (review the plan)
+review:    Abraham crossed out "everything in How" from Task 1, because it bundled all §5/D3/D10
+           validation into the AC-7 task without a test, and made validation its own Task 7,
+           with test-writer unit tests first. He moved the reviewer delegation from after the
+           last task to after Task 5, the first task that touches the store and S-1 data. He
+           rejected the plan's line "approved without corrections" and its claim that _put
+           was already a team decision; the D10/D13 points were settled in the doc first
+           (entry 33, 3d6a2e9).
+checks:    grep -n "~~" docs/plans/S-3-plan.md → 3 crossed-out passages; each task names one
+           AC except Task 7 (validation, §5/D3/D10) and Task 8 (demo, D13)
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; D10, D13; Deliverable 4a
+risk:      Tasks 7 and 8 are not tied to an AC. The handout asks for every task to be tied to
+           one, so a grader may count them as unplanned work. They rest on §5/D10 and D13 instead.
