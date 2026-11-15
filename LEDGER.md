@@ -683,3 +683,21 @@ checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac7_qua
 evidence:  S-3; AC-7; R1, R2, R4 (fit_score part); §5; D9
 risk:      Ties keep input order (Python's stable sort) until Task 3, and the exception
            constructors are uncovered (ranking.py lines 34-36, 41-42, 47-48) until Task 7.
+
+## Entry 36
+artifact:  src/jobsboard/ranking.py; prompts/s3_task_2_AC-6.md; commit d569d92
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 2 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_2_AC-6.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           One line changed: the sort key went from -fit_score to (not meets_minimum,
+           -fit_score), so every qualified entry comes before every flagged one (R3) and
+           fit_score stays descending within each group (R4). Matching, flag,
+           missing_required and the exceptions are unchanged; no other file changed.
+checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac6_flagged_never_above_qualified
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 4 failed, 6 passed, total 90.28% (failing: AC-8, AC-21,
+           AC-22, AC-23, as the plan expects)
+evidence:  S-3; AC-6; R3, R4 (fit_score part)
+risk:      Ties within a group still keep input order (stable sort) until Task 3 adds the
+           application_id tie-break (D2).
