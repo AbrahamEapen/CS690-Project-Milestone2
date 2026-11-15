@@ -872,3 +872,29 @@ evidence:  S-3; §5, §7, D3, D9, D10, D11 (as amended in 622086e and 30ec446); 
 risk:      The suite is red until Task 7b builds validation. That skills are stored as given is
            assumed by the tests but not written in D11. Q4 (bytes as the whole skills argument)
            stays untested.
+
+## Entry 45
+artifact:  src/jobsboard/ranking.py; src/jobsboard/ranking_store.py;
+           prompts/s3_task_7b_validation.md; commit 6f71ca3
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 7 of docs/plans/S-3-plan.md (built after the test-writer tests in
+           entry 44)
+prompts:   prompts/s3_task_7b_validation.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           ranking.py: _validate_fit_score (type(x) is int and 0..100, else InvalidFitScore)
+           and _validate_skills (a single str, including "", raises first; the iterable is read
+           once; pass 1 raises the first non-str by repr order; pass 2 raises the first blank
+           str by sorted() order, raw value kept). rank_applicants validates everything first
+           in D10 order (required skills, then per candidate duplicate ID, fit score, skills)
+           and ranks the validated skill lists; ranking logic unchanged. ranking_store.py: the
+           setters call the same helpers (set_profile: fit_score before skills) and write only
+           after validation passes, so a failed set keeps the earlier value; skills are stored
+           as given. This closes the reviewer's Task 5 findings 1 and 2 (entry 41).
+checks:    python -m pytest -q tests/unit/test_ranking_validation.py tests/acceptance → 96 passed;
+           python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 100 passed, total 96.57%; ranking.py and ranking_store.py
+           100% lines and branches
+evidence:  S-3; §5, D3, D9, D10, D11 (as amended in 622086e and 30ec446); Task 7
+risk:      ranking_store.py imports the private helpers _validate_fit_score and
+           _validate_skills from ranking.py, so a rename there breaks the store; the headless
+           review may flag it. The 404 handler (api.py line 66) is still untested until 5b.
