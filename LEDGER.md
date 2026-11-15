@@ -782,3 +782,23 @@ checks:    git diff docs/design/S-3.md → D10 only; python -m pytest -q → 1 f
 evidence:  S-3 D10, D11, §5
 risk:      Other iterables that are not collections of str, such as bytes or a dict of skills,
            are still not named in D10; Task 7's unit tests will show what they do.
+
+## Entry 41
+artifact:  evidence/delegation/reviewer-task5.md (and reviewer-task5.txt, /export transcript);
+           review of task 5, commit d3b2641
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent reviewer
+prompts:   prompts/s3_review_task5_prompt.md (main-agent prompt and the prompt it passed to
+           reviewer, both verbatim)
+review:    The reviewer returned "verdict: pass" with 4 minor findings. Abraham answered each:
+           (1) ranking_store.py:25 set_requirements does not validate → rejected, already
+           planned as Task 7 (plan correction 1; D10 amended in 622086e). (2) ranking_store.py:29
+           set_profile stores invalid fit scores and skills, so D12's "stored data is always
+           valid" does not hold yet → rejected for now, Task 7. (3) ranking_store.py:41 no
+           Rejected filter → rejected, already planned as Task 6. (4) api.py:93 no test for the
+           404 or the 200 [] response → accepted; an integration test in Deliverable 5b will
+           cover both.
+checks:    report saved verbatim; git diff --stat d3b2641 HEAD -- src → empty (no code changed
+           by the review)
+evidence:  S-3; AC-8, AC-23; R6, R7, D8, D10, D11, D12, §4; Deliverable 4c
+risk:      Until Task 7, /ranked can return an out-of-range fit_score set through Python. Until
+           5b, a change to the 404 body or the empty-list response would not fail any test.
