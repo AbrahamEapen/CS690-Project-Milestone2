@@ -4,7 +4,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 
 from jobsboard.pipeline import Application, Stage
-from jobsboard.ranking import Candidate
+from jobsboard.ranking import Candidate, _validate_fit_score, _validate_skills
 
 
 class PostingNotFound(ValueError):
@@ -21,13 +21,18 @@ class RankingStore:
         self._profiles: dict[str, Candidate] = {}
 
     def set_requirements(self, posting_id: str, skills: Iterable[str]) -> None:
-        # D11: overwrites earlier values. Validation on set comes in Task 7.
-        self._requirements[posting_id] = frozenset(skills)
+        # D11: validate on set with the same errors as rank_applicants, then overwrite.
+        # Nothing is written when validation raises, so an earlier value is kept.
+        validated = _validate_skills(skills)
+        self._requirements[posting_id] = frozenset(validated)
 
     def set_profile(self, application_id: str, skills: Iterable[str], fit_score: int) -> None:
-        # D11: keyed by application_id only; overwrites earlier values. Validation comes in Task 7.
+        # D11: keyed by application_id only; fit_score is checked before skills (D10 order);
+        # nothing is written when validation raises, so an earlier profile is kept.
+        _validate_fit_score(application_id, fit_score)
+        validated = _validate_skills(skills)
         self._profiles[application_id] = Candidate(
-            application_id=application_id, skills=frozenset(skills), fit_score=fit_score
+            application_id=application_id, skills=frozenset(validated), fit_score=fit_score
         )
 
     def candidates_for_posting(

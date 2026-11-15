@@ -1,6 +1,7 @@
 """S-3 ranked applicants with a minimum flag (docs/design/S-3.md)."""
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 
 # Named settings (S-3.md section 8 table, D9).
@@ -48,6 +49,29 @@ class InvalidSkill(ValueError):
         self.skill = skill
 
 
+def _validate_fit_score(application_id: str, fit_score: object) -> None:
+    # Section 5, D3: a plain int from FIT_SCORE_MIN to FIT_SCORE_MAX inclusive; bool, float,
+    # str and None are rejected, and out-of-range scores are rejected, not clamped.
+    if type(fit_score) is not int or not FIT_SCORE_MIN <= fit_score <= FIT_SCORE_MAX:
+        raise InvalidFitScore(application_id, fit_score)
+
+
+def _validate_skills(skills: object) -> list[str]:
+    # D10: skills given as a single str (including "") are rejected with that str.
+    if isinstance(skills, str):
+        raise InvalidSkill(skills)
+    items = list(skills)  # D10: any iterable is accepted; read it once.
+    # D10 pass 1: non-str skills, in sorted(key=repr) order.
+    non_str = sorted((s for s in items if not isinstance(s, str)), key=repr)
+    if non_str:
+        raise InvalidSkill(non_str[0])
+    # D10 pass 2 (section 5): str skills blank after strip(), in sorted() order; raw value kept.
+    blank = sorted(s for s in items if not s.strip())
+    if blank:
+        raise InvalidSkill(blank[0])
+    return items
+
+
 def _normalize(skill: str) -> str:
     # R1: skills match when equal after strip() and casefold().
     return skill.strip().casefold()
@@ -68,7 +92,7 @@ def _skill_key(skill: str) -> str | frozenset[str]:
     return n
 
 
-def _missing_required(required_skills: frozenset[str], skills: frozenset[str]) -> tuple[str, ...]:
+def _missing_required(required_skills: Iterable[str], skills: Iterable[str]) -> tuple[str, ...]:
     have = {_skill_key(s) for s in skills}
     # D1: required skills with the same key count as one requirement.
     requirements: dict[str | frozenset[str], list[str]] = {}
@@ -81,9 +105,21 @@ def _missing_required(required_skills: frozenset[str], skills: frozenset[str]) -
 
 
 def rank_applicants(required_skills: frozenset[str], candidates: list[Candidate]) -> list[RankedEntry]:
+    # D3, D10: validate all input before ranking, raising the first problem in this order:
+    # required skills, then each candidate in list order (duplicate ID, fit score, skills).
+    required = _validate_skills(required_skills)
+    checked: list[tuple[Candidate, list[str]]] = []
+    seen: set[str] = set()
+    for c in list(candidates):
+        if c.application_id in seen:  # D3: exact string match
+            raise DuplicateApplication(c.application_id)
+        seen.add(c.application_id)
+        _validate_fit_score(c.application_id, c.fit_score)
+        checked.append((c, _validate_skills(c.skills)))
+
     entries = []
-    for c in candidates:
-        missing = _missing_required(required_skills, c.skills)
+    for c, skills in checked:
+        missing = _missing_required(required, skills)
         meets = not missing  # R1
         entries.append(
             RankedEntry(
