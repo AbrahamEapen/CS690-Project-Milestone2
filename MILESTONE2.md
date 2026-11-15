@@ -19,7 +19,7 @@ Repository: https://github.com/AbrahamEapen/CS690-Project-Milestone2. It starts 
 
 ## Team roles
 
-_TODO (Deliverable 8): who led the agent setup, the acceptance tests, the build, and the test-strength work._
+Abraham Eapen led the agent setup, the acceptance tests, the build, and the test-strength work. Everyone works with the agent.
 
 ## 1. Follow-up, the story, and its open questions
 
@@ -72,7 +72,17 @@ The prompt is in `prompts/s3_gap_check_2_prompt.md`, and the reply and marks are
 
 ## 3b. Answers to the test-writer audit
 
-_TODO (Deliverable 3b)._
+The audit report is `evidence/test-audit.md` (test-writer subagent; transcript `evidence/delegation/test-writer-audit.txt`, ledger entry 29). Abraham recomputed every expected value by hand from its criterion and confirmed that each test fails because S-3 is missing (`ModuleNotFoundError: jobsboard.ranking` or no `api.ranking_store`), not because of a mistake in the test.
+
+| # | Finding | Answer |
+| --- | --- | --- |
+| 1 | AC-21 (D7 synonyms) had no test | Fixed: test-writer added `test_ac21_synonym_meets_minimum`, a5d5f2e. Hand check: postgres ≡ postgresql, so A qualifies; B misses `("PostgreSQL",)`, the posting spelling (§5). |
+| 2 | AC-22 (D2 ties) had no test | Fixed: `test_ac22_equal_fit_scores_ordered_by_application_id`, a5d5f2e. Hand check: tie at 70 → "a" before "b"; input given in reverse order. |
+| 3 | AC-23 (D8 filtering over HTTP) had no test | Fixed: `test_ac23_ranked_endpoint_lists_only_scored_non_rejected`, a5d5f2e. Hand check: Y Rejected and Z unscored are excluded; X → `{id, 50, true, null, []}` per §4. |
+| 4 | AC-8's "stage still Applied" check could not fail, because the test called `rank_applicants` directly and never opened the ranked list | Fixed by the team: the test now calls `GET /postings/P/ranked`, e06026b. |
+| 5 | AC-8 checked only that B is in Applied, not that it is absent from the other stages | Fixed in the same team commit: the whole `stages` map is compared, e06026b. |
+
+The report found no expected value that does not follow from its criterion and no type-only or length-only assert; our hand check agrees.
 
 ## 4a. Changes to the plan
 
