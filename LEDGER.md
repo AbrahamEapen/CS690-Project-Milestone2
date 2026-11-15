@@ -915,3 +915,31 @@ checks:    git diff → D13 and one plan table row only; python -m pytest --cov=
 evidence:  S-3 D13, §4; Deliverable 4f
 risk:      The demo seed is not covered by any automated test until Task 8 or Deliverable 5;
            the README steps are checked only by hand.
+
+## Entry 47
+artifact:  src/jobsboard/ranking_store.py (seed_demo); src/jobsboard/api.py (JOBSBOARD_DEMO
+           hook); README.md ("Try the story"); prompts/s3_task_8_demo.md; commit b7e7fb9
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 8 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_8_demo.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, including the agent's one
+           unspecified choice, applicant_id "applicant-x", then approved the diff. seed_demo
+           seeds the 7 postings of the plan table (6 AC rows plus demo-empty): applications at
+           Applied through ApplicationStore._put with fixed demo-acN-x IDs (D13), requirements and
+           profiles through the validating setters, demo-ac23-z with no profile, and demo-ac23-y
+           moved to Rejected with move_stage. api.py seeds once at import only when
+           os.environ.get("JOBSBOARD_DEMO") == "1". The README section gives the start command,
+           one URL per AC with what it shows, the empty state and the error state.
+checks:    python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 100 passed, total 90.55%. JOBSBOARD_DEMO=1 uvicorn
+           jobsboard.api:app --app-dir src, then curl: demo-ac6 → a (40, no flag), b (90, flagged,
+           ["kdb+"]); demo-ac7 → b 80, c 70, a 55, no flags; demo-ac8 → b flagged, and its
+           pipeline shows b only under Applied; demo-ac21 → a (no flag), b (flagged,
+           ["PostgreSQL"]); demo-ac22 → a, b, both 70, no flags; demo-ac23 → only x (and its
+           pipeline shows y under Rejected); demo-empty → 200 []; no-such-posting → 404
+           {"detail":{"error":"posting_not_found"}}. Without JOBSBOARD_DEMO: demo-ac6 and
+           demo-empty → 404 (nothing seeded).
+evidence:  S-3; AC-6, AC-7, AC-8, AC-21, AC-22, AC-23; D13, §4; Deliverables 4b and 4f
+risk:      No automated test runs the demo, so coverage fell from 96.57% to 90.55%
+           (ranking_store.py lines 72-88 and api.py line 26 uncovered); the curl checks are by
+           hand. seed_demo depends on the private ApplicationStore._put (D13).
