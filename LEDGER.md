@@ -589,3 +589,20 @@ checks:    .venv/bin/python -m pytest -q tests/acceptance → 6 failed; AC-8 now
 evidence:  S-3; AC-8; R6, D12
 risk:      AC-8 no longer calls rank_applicants directly, so R6 for the function's own input
            list (unchanged after ranking) is left to the property test planned in 5c.
+
+## Entry 31
+artifact:  evidence/red.txt (3c); .claude/settings.json deny rule Edit(./tests/acceptance/**)
+           and tag m2-tests-locked (3d)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+prompts:   prompts/m2_session_prompts.md item 8 (run red, then lock after approval)
+review:    Abraham approved the lock after the 3b answers were committed. red.txt is the
+           tool's own output, written with tee. Only the handout's Edit deny rule was added
+           (team decision, 2026-11-11); Claude Code applies Edit rules to Write as well.
+checks:    python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 | tee evidence/red.txt → 6 failed (all S-3: ModuleNotFoundError
+           or missing api.ranking_store), 4 passed (S-1), coverage 92.86%
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 3c, 3d
+risk:      The rule binds only sessions started in Milestone-2/ (this session started one folder
+           up and did not load .claude/). A Bash write (sed -i, redirect) into
+           tests/acceptance/ is not covered by the Edit rule; the git diff --stat check at
+           m2-green is the backstop.
