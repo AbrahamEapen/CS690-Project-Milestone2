@@ -623,3 +623,23 @@ checks:    git status --short → clean; git diff --stat m2-tests-locked -- test
 evidence:  Deliverable 2b, 3d; AC-7
 risk:      Only the Edit path was tested. A Bash write into tests/acceptance/ (sed -i, >) is
            still possible and would be caught only after the fact by the m2-green diff check.
+
+## Entry 33
+artifact:  docs/design/S-3.md D10 (two-pass skill check; blank skill → InvalidSkill;
+           PostingNotFound subclasses ValueError) and D13 (demo IDs via _put)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (main agent typed the
+           wording Abraham approved)
+prompts:   prompts/m2_session_prompts.md item 9 (review the S-3 plan and settle its open points)
+review:    The plan agent found that D10's "skills in sorted() order" cannot be built: sorted()
+           raises TypeError when a skill set mixes str and non-str values. Abraham approved a
+           two-pass rule (non-str by sorted(key=repr), then blank str in sorted() order) and
+           settled the plan's two assumptions (a blank skill raises InvalidSkill; PostingNotFound
+           subclasses ValueError per D3). For D13, Abraham chose the private _put over random
+           IDs from store.create(), so the "Try the story" steps can use readable IDs. Design
+           doc changed first, before the plan and any code, as the handout orders.
+checks:    git diff docs/design/S-3.md → only D10 and D13 changed; python -m pytest -q → 6 failed,
+           4 passed (unchanged; no code yet)
+evidence:  S-3 §5, D3, D10, D13
+risk:      No acceptance test covers validation; the two-pass order is checked only by the
+           unit tests planned for Task 7. The _put call couples the demo to a private S-1
+           method that S-1 could rename.
