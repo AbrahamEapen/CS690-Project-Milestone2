@@ -53,11 +53,31 @@ def _normalize(skill: str) -> str:
     return skill.strip().casefold()
 
 
+def _spelling_order(spelling: str) -> tuple[str, str]:
+    # Section 5 and D1: sort by (casefold(), spelling).
+    return (spelling.casefold(), spelling)
+
+
+def _skill_key(skill: str) -> str | frozenset[str]:
+    # R1, D7: skills match when their normalized forms are equal or in the same
+    # SKILL_SYNONYMS group; the group itself is the key, so matching works both ways.
+    n = _normalize(skill)
+    for group in SKILL_SYNONYMS:
+        if n in group:
+            return group
+    return n
+
+
 def _missing_required(required_skills: frozenset[str], skills: frozenset[str]) -> tuple[str, ...]:
-    # Section 5: each unmatched required skill's trimmed spelling, sorted by (casefold(), spelling).
-    have = {_normalize(s) for s in skills}
-    missing = {r.strip() for r in required_skills if _normalize(r) not in have}
-    return tuple(sorted(missing, key=lambda s: (s.casefold(), s)))
+    have = {_skill_key(s) for s in skills}
+    # D1: required skills with the same key count as one requirement.
+    requirements: dict[str | frozenset[str], list[str]] = {}
+    for r in required_skills:
+        requirements.setdefault(_skill_key(r), []).append(r.strip())
+    # D1: a missing requirement shows the posting spelling that sorts first;
+    # section 5: missing_required is sorted by (casefold(), spelling).
+    missing = [min(spellings, key=_spelling_order) for key, spellings in requirements.items() if key not in have]
+    return tuple(sorted(missing, key=_spelling_order))
 
 
 def rank_applicants(required_skills: frozenset[str], candidates: list[Candidate]) -> list[RankedEntry]:
