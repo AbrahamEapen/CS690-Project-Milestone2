@@ -766,3 +766,19 @@ evidence:  S-3; AC-8; R6, D5, D11, D12, §4
 risk:      The 404 path (api.py line 66, ranking_store.py lines 12-13 and 38) has no saved test;
            Deliverable 5 should add one. Until Task 7 the store accepts any value, so bad data
            set through Python is only caught when it breaks ranking.
+
+## Entry 40
+artifact:  docs/design/S-3.md D10 (a skills argument given as a single str raises InvalidSkill)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session reviewing
+           task diffs; it typed the wording Abraham chose)
+prompts:   prompts/m2_session_prompts.md item 10 (review task 5)
+review:    While reviewing Task 5 (d3b2641), the reviewing session showed that
+           RankingStore.set_profile(id, "Java", 50) stores the skills {"J", "a", "v"} without
+           error, because D10/D11 accept "any iterable" and a str is one. The doc did not cover
+           this. Abraham chose to raise InvalidSkill(the str), reusing the existing error,
+           over accepting it silently. Doc changed before Task 7 builds validation.
+checks:    git diff docs/design/S-3.md → D10 only; python -m pytest -q → 1 failed (AC-23,
+           expected), 9 passed
+evidence:  S-3 D10, D11, §5
+risk:      Other iterables that are not collections of str, such as bytes or a dict of skills,
+           are still not named in D10; Task 7's unit tests will show what they do.

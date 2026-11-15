@@ -22,3 +22,5 @@ through the agent's multiple-choice questions are listed after each request.
    - AC-8 finding: fix the test to go through GET /postings/P/ranked and check the whole pipeline (team commit). Hand recomputation of all six expected values: confirmed by Abraham.
 9. "The S-3 plan is saved to docs/plans/S-3-plan.md. It isn't committed yet. Review and prompt me for next steps"
    - Validation: own task (Task 7), test-writer drafts unit tests first. Reviewer: after Task 5. Demo seed: store._put, recorded in D13. D10 two-pass wording: approved.
+10. Task reviews: "Task N is committed, please review and prompt for any question or validation. Then move to next step" (tasks 1-5)
+   - Task 5 review: a bare str for skills raises InvalidSkill(the str) (D10 amended before Task 7).
