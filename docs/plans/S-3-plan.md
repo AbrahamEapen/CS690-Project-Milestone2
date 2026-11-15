@@ -49,6 +49,7 @@ S-3 acceptance tests are locked (`m2-tests-locked`, red run: 6 S-3 failed, 4 S-1
 | `demo-ac21` | PostgreSQL | `demo-ac21-a` (Postgres; 60), `demo-ac21-b` (MySQL; 90) | a, then b flagged, missing `["PostgreSQL"]` |
 | `demo-ac22` | Java | `demo-ac22-b` (Java; 70) inserted first, then `demo-ac22-a` (Java; 70) | a, b, no flags |
 | `demo-ac23` | Java | `demo-ac23-x` (50); `demo-ac23-y` (80) moved to Rejected; `demo-ac23-z` with no profile | only x, unflagged |
+| `demo-empty` | Java | none (added in Task 8, D13) | `[]` (empty state, §4) |
 
 ## Tasks
 Each task gets one commit (`task N: … (AC-x)`). The team saves each prompt to `prompts/s3_task_AC-x.md` and writes the ledger entry. The full test command runs after every task.

@@ -26,3 +26,5 @@ through the agent's multiple-choice questions are listed after each request.
    - Task 5 review: a bare str for skills raises InvalidSkill(the str) (D10 amended before Task 7).
 11. "Task 7 plan is generated. please review and prompt with questions or decisions" (test-writer's Task 7 tests, uncommitted)
    - Q1-Q3 settled in D10/D11 as proposed; Q4 (bytes) no new rule; test-writer strengthens the two store tests that have no assert.
+12. "Task 7b diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
+   - Add demo-empty (200 []) to D13 and the plan for the 4f empty-state screenshot.

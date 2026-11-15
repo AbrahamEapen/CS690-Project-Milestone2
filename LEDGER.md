@@ -898,3 +898,20 @@ evidence:  S-3; §5, D3, D9, D10, D11 (as amended in 622086e and 30ec446); Task 
 risk:      ranking_store.py imports the private helpers _validate_fit_score and
            _validate_skills from ranking.py, so a rename there breaks the store; the headless
            review may flag it. The 404 handler (api.py line 66) is still untested until 5b.
+
+## Entry 46
+artifact:  docs/design/S-3.md D13 and docs/plans/S-3-plan.md demo table (demo-empty posting)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session reviewing
+           task work; it typed the change Abraham chose)
+prompts:   prompts/m2_session_prompts.md item 12 (review task 7b; plan Task 8)
+review:    Reviewing Task 7b (6f71ca3): it matches §5/D3/D10/D11; 100 tests pass, and ranking.py
+           and ranking_store.py have 100% line and branch coverage. Noted for the 4e refactor:
+           ranking_store.py imports the private _validate_* helpers from ranking.py. For 4f the
+           handout wants a screenshot of the empty or error state; the 404 needs no seed, but no
+           demo posting showed 200 []. Abraham chose to add demo-empty to D13 and the plan,
+           rather than showing only the 404.
+checks:    git diff → D13 and one plan table row only; python -m pytest --cov=jobsboard
+           --cov-branch --cov-report=term-missing --cov-fail-under=80 → 100 passed, 96.57%
+evidence:  S-3 D13, §4; Deliverable 4f
+risk:      The demo seed is not covered by any automated test until Task 8 or Deliverable 5;
+           the README steps are checked only by hand.
