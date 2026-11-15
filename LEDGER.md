@@ -1006,3 +1006,24 @@ evidence:  Deliverable 4e, 5d, 5e
 risk:      S-1's pipeline.py is no longer under the coverage gate; a drop there would go
            unnoticed. api.py is gated but not mutated, so the strength of the route's tests is
            measured only by coverage.
+
+## Entry 51
+artifact:  tests/unit/test_ranking_edge_cases.py (36), tests/integration/test_ranked_endpoint.py
+           (12), tests/property/test_ranking_properties.py (5); evidence/delegation/
+           test-writer-strength.md; commit "5a-5c: edge-case, integration and property tests"
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent test-writer
+prompts:   prompts/s3_test_strength_prompt.md
+review:    Abraham reviewed the subagent's three files with a second session before committing.
+           5a: the header maps all 14 §7 edge cases to a test; hand checks include the
+           flagged-group tie B, C, A, the trimmed " Java " → ("Java",), and the casefold sort
+           ("apple", "Banana", "kdb+"). 5b joins the S-3 data module (api.ranking_store) and the
+           /ranked route with S-1's ApplicationStore (api.store) with no mock; it closes
+           reviewer finding 4 of entry 41 (404 and 200 [] untested). 5c checks R3, R4, R5 and R6
+           (twice) as relations, with no re-sort. No test was rejected. No test failed, so this
+           pass found no bug.
+checks:    pytest -q per file → 36, 12, 5 passed; README gated command → 153 passed, 97.54%
+           (ranking.py and ranking_store.py 100%; api.py 92%, missing 26, 36, 47)
+evidence:  S-3 §4, §6 R3–R6, §7, D1, D7, D8, D11–D13; Deliverable 5a–5c
+risk:      Two integration tests import api.py in a subprocess to exercise the JOBSBOARD_DEMO
+           hook. Coverage does not measure that process (so api.py line 26 shows as missed),
+           and under mutmut it may run unmutated code.
