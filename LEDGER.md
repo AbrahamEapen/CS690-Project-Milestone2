@@ -546,3 +546,26 @@ risk:      The permission rules have not been confirmed with /permissions after 
            pyproject.toml exist. Bash commands such as sed or a redirect could still write
            into tests/acceptance/ after the lock, because the Edit deny rule covers only the
            Edit tool.
+
+## Entry 29
+artifact:  tests/acceptance/test_s3_ranking.py (AC-21, AC-22, AC-23 tests), commit a5d5f2e;
+           evidence/test-audit.md; evidence/delegation/s3-test-audit-report.md and
+           test-writer-audit.txt (/export transcript)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent test-writer
+prompts:   audit the S-3 acceptance tests and write a test for each criterion without one;
+           prompts/s3_test_audit_prompt.md
+review:    The main agent delegated to test-writer (the transcript shows
+           "test-writer(Audit S-3 acceptance tests)"). It reported AC-21..AC-23 untested and
+           added one test each; no expected value or type-only assert was flagged. Abraham
+           recomputed all six expected values by hand from the criteria (AC-21's
+           missing_required ("PostgreSQL",) from §5; AC-22's "a","b" from D2; AC-23's JSON from
+           §4 and D8) and confirmed each test fails only because S-3 is missing. Abraham
+           accepted the subagent's weak-spot finding on AC-8 and fixed it in a separate
+           commit (entry 30).
+checks:    .venv/bin/python -m pytest -q tests/acceptance/test_s3_ranking.py → 6 failed
+           (ModuleNotFoundError jobsboard.ranking ×5; no attribute api.ranking_store ×1);
+           cmp evidence/test-audit.md evidence/delegation/s3-test-audit-report.md → identical
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; D2, D7, D8, D12
+risk:      AC-23 and the new AC-8 depend on api.ranking_store being a module-level object
+           that keeps state between requests (D12); a store rebuilt per request would fail
+           them for a reason the criteria do not state.
