@@ -1027,3 +1027,26 @@ evidence:  S-3 §4, §6 R3–R6, §7, D1, D7, D8, D11–D13; Deliverable 5a–5c
 risk:      Two integration tests import api.py in a subprocess to exercise the JOBSBOARD_DEMO
            hook. Coverage does not measure that process (so api.py line 26 shows as missed),
            and under mutmut it may run unmutated code.
+
+## Entry 52
+artifact:  evidence/coverage.txt (5d); pyproject.toml [tool.mutmut]; evidence/mutation-before.txt (5e)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session: ran
+           coverage and mutmut 3.8.1, proposed the triage)
+prompts:   prompts/m2_session_prompts.md item 15 (review 5a-5c, then 5d and 5e)
+review:    mutmut config: source_paths ["src/"] copies all of src/ into mutants/, only_mutate
+           limits mutation to ranking.py and ranking_store.py (Abraham's choice, entry 50), and
+           also_copy adds pytest.ini, which mutmut does not copy by default. The first run was
+           not saved with tee, so the mutants/ cache was moved aside (no rm -rf) and the run was
+           repeated twice; mutation-before.txt is the raw output of the last run plus
+           "mutmut results". 158 mutants: 153 killed, 5 survived. Abraham's triage: #1-#4
+           (exception message → None in PostingNotFound, InvalidFitScore, DuplicateApplication,
+           InvalidSkill) are equivalent under D9 ("no message format is required"). Killing
+           them would need expected values taken from the code. #5 (seed_demo applicant_id →
+           None) is killable from S-1 §4/§5 (applicant_id is a non-empty str); test-writer will
+           add that test. Abraham rejected pinning the messages.
+checks:    README gated command | tee evidence/coverage.txt → 153 passed, 97.54%; mutmut run →
+           158/158, 153 killed, 5 survived (1.98 mutations/second)
+evidence:  S-3 D9, D13; S-1 §4, §5; Deliverable 5d, 5e
+risk:      Mutation covers only ranking.py and ranking_store.py; the /ranked route in api.py is
+           measured only by coverage. Two integration tests run api.py in a subprocess, and
+           which source that subprocess loads under mutmut was not checked.

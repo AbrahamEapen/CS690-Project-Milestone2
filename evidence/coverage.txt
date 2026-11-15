@@ -1,0 +1,35 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.4, pluggy-1.7.0
+rootdir: /root/CS690/Project/Milestone-2
+configfile: pytest.ini
+testpaths: tests
+plugins: platformdirs-4.14.5, cov-7.1.0, anyio-4.16.0, hypothesis-6.170.15
+collected 153 items
+
+tests/acceptance/test_s3_ranking.py ......                               [  3%]
+tests/integration/test_ranked_endpoint.py ............                   [ 11%]
+tests/property/test_ranking_properties.py .....                          [ 15%]
+tests/test_s1_pipeline.py ....                                           [ 17%]
+tests/unit/test_ranking_edge_cases.py .................................. [ 39%]
+..                                                                       [ 41%]
+tests/unit/test_ranking_validation.py .................................. [ 63%]
+........................................................                 [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.12/site-packages/starlette/testclient.py:40
+  /root/CS690/Project/Milestone-2/.venv/lib/python3.12/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.3-final-0 ________________
+
+Name                             Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------
+src/jobsboard/api.py                53      3      6      2    92%   26, 36, 47
+src/jobsboard/ranking.py            79      0     20      0   100%
+src/jobsboard/ranking_store.py      37      0      8      0   100%
+----------------------------------------------------------------------------
+TOTAL                              169      3     34      2    98%
+Required test coverage of 80% reached. Total coverage: 97.54%
+======================== 153 passed, 1 warning in 4.40s ========================

@@ -31,3 +31,5 @@ through the agent's multiple-choice questions are listed after each request.
 13. "Task 8 diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
 14. "4e ,refactor, diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
    - Coverage gate: story files only (ranking, ranking_store, api). Mutation: ranking.py + ranking_store.py.
+15. "test-writer has drafted the three Deliverable 5 files ... review and validate . prompt me for any questions or decisions. then move to next step"
+   - Approve 5a-5c and continue to 5d/5e. Survivors: #1-4 equivalent (D9), #5 killed by test-writer from S-1 §4/§5.
