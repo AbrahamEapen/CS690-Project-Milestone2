@@ -1084,3 +1084,26 @@ checks:    mutmut run → 158/158, 154 killed, 4 survived; every test name in th
 evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 5b, 5d, 5e, 5f
 risk:      The evidence column for AC-22 and AC-23 points at team decisions (Q-6, D8) rather
            than interview evidence; no recruiter has confirmed either rule (entry 26).
+
+## Entry 55
+artifact:  scripts/review_story.sh, agent/review-schema.json (commits fb23b12, 27b1c80);
+           evidence/headless-review.json; MILESTONE2.md §6c
+tool:      Claude Code 2.1.325 headless (claude -p --output-format json --json-schema),
+           Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent reviewer; run by the second
+           session at Abraham's request
+prompts:   the PROMPT in scripts/review_story.sh (handout core, verbatim, story ID S-3)
+review:    First run: the CLI refused the schema ("no schema with key or ref
+           https://json-schema.org/draft/2020-12/schema") and wrote an empty file. The $schema
+           line was removed, and stdin was redirected from /dev/null after a 3 s stdin wait
+           warning. Second run (27b1c80): verdict pass with no findings. Because zero findings
+           can mean the main agent reviewed the files itself, Abraham had subagent_stats checked:
+           by_type {"reviewer": 1}, completed 1, no permission denials, so the main form was
+           used, not --agent reviewer. The JSON was checked for secrets (only token counts and
+           a credential expiry time) and committed unedited.
+checks:    ./scripts/review_story.sh → exit 0, 42 s; structured_output → {"verdict": "pass",
+           "findings": []}; is_error false; modelUsage lists claude-opus-5-5 and, for $0.0001,
+           claude-haiku-5-5
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 6
+risk:      A single headless pass with no findings is weak evidence of correctness. The
+           reviewer is a model, and this run was not repeated. modelUsage shows a small
+           claude-haiku-5-5 call whose purpose is not visible in the JSON.

@@ -131,7 +131,9 @@ _TODO (team, one sentence): what the mutation score told you that coverage did n
 
 ## 6c. Answers to the headless review
 
-_TODO._
+`scripts/review_story.sh` was run at commit 27b1c80, after `m2-green`, under the normal permission rules. It reviewed the files changed since `m2-tests-locked`: `src/jobsboard/api.py`, `ranking.py` and `ranking_store.py`. The report in `evidence/headless-review.json` is committed exactly as the tool wrote it. Its `structured_output` is `{"verdict": "pass", "findings": []}`, so there are no findings to answer.
+
+We checked that the main agent did not review the files itself: `subagent_stats.by_type` is `{"reviewer": 1}` (1 spawned, 1 completed, no permission denials), so the `--agent reviewer` fallback was not needed. The first attempt failed before any review ran: the CLI's schema validator rejected the `$schema` draft-2020-12 meta-reference. The fix is in 27b1c80, and `stdin` is now read from `/dev/null`. The reviewer's earlier findings on the same code were answered in ledger entry 41 and closed by Tasks 6 and 7 and the 5b integration test, which may be why this pass found nothing.
 
 ## Reflection
 
