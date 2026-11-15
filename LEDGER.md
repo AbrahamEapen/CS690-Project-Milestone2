@@ -569,3 +569,23 @@ evidence:  S-3; AC-6..AC-8, AC-21..AC-23; D2, D7, D8, D12
 risk:      AC-23 and the new AC-8 depend on api.ranking_store being a module-level object
            that keeps state between requests (D12); a store rebuilt per request would fail
            them for a reason the criteria do not state.
+
+## Entry 30
+artifact:  tests/acceptance/test_s3_ranking.py, test_ac8_flagged_applicant_kept_and_stage_unchanged;
+           commit "3b: AC-8 test opens the ranked list (team fix)"
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (main agent typed the
+           change Abraham chose; no subagent)
+prompts:   prompts/m2_session_prompts.md item 8 (answer the test-writer audit)
+review:    Team fix for the test-writer finding in evidence/test-audit.md: the old AC-8 test
+           ranked with rank_applicants directly, which never touches the S-1 store, so its
+           "stage still Applied" assert could not fail. Abraham chose to have the test open
+           GET /postings/P/ranked (the criterion's "opens the ranked list") and to compare the
+           whole pipeline, so B must be in Applied and in no other stage. The criterion text
+           and design doc are unchanged; no expected value changed (B listed, flagged, Applied).
+           Abraham rejected the alternative of keeping the direct call.
+checks:    .venv/bin/python -m pytest -q tests/acceptance → 6 failed; AC-8 now fails with
+           AttributeError: module 'jobsboard.api' has no attribute 'ranking_store' (feature
+           missing), not with an error in the test
+evidence:  S-3; AC-8; R6, D12
+risk:      AC-8 no longer calls rank_applicants directly, so R6 for the function's own input
+           list (unchanged after ranking) is left to the property test planned in 5c.

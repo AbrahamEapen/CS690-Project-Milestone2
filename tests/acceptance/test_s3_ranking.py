@@ -50,26 +50,28 @@ def test_ac7_qualified_ordered_by_fit_score():
 # AC-8: Given posting P requires {Java, kdb+}; applicant B (stage Applied) has only Java.
 # When the recruiter opens the ranked list for P, Then B still appears in the list, flagged
 # "Does not meet minimum", and B's stage is still Applied.
+# Team fix in 3b (test-writer audit finding): the recruiter "opens the ranked list" through
+# GET /postings/P/ranked, so the stage check can catch a /ranked route that changes stages (R6).
 def test_ac8_flagged_applicant_kept_and_stage_unchanged():
     from fastapi.testclient import TestClient
 
-    from jobsboard.api import app
-    from jobsboard.ranking import Candidate, rank_applicants
+    from jobsboard import api
 
-    client = TestClient(app)
+    client = TestClient(api.app)
     posting_id = f"posting-{uuid.uuid4().hex}"
     created = client.post(f"/postings/{posting_id}/applications", json={"applicant_id": "applicant-B"})
+    assert created.status_code == 201
     app_id = created.json()["application_id"]
+    api.ranking_store.set_requirements(posting_id, {"Java", "kdb+"})
+    api.ranking_store.set_profile(app_id, {"Java"}, 75)
 
-    ranked = rank_applicants(
-        frozenset({"Java", "kdb+"}),
-        [Candidate(application_id=app_id, skills=frozenset({"Java"}), fit_score=75)],
-    )
+    resp = client.get(f"/postings/{posting_id}/ranked")
 
-    assert [e.application_id for e in ranked] == [app_id]
-    assert ranked[0].flag == FLAG
+    assert resp.status_code == 200
+    assert [e["application_id"] for e in resp.json()] == [app_id]
+    assert resp.json()[0]["flag"] == FLAG
     stages = client.get(f"/postings/{posting_id}/pipeline").json()["stages"]
-    assert app_id in stages["Applied"]
+    assert stages == {"Applied": [app_id], "Screened": [], "Interview": [], "Offer": [], "Rejected": []}
 
 
 # AC-21 (S-3 D7, R1, R2): Given posting P requires {PostgreSQL}; applicant A has {Postgres}

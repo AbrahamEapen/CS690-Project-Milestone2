@@ -18,3 +18,5 @@ through the agent's multiple-choice questions are listed after each request.
 7. "I would like to complete story 3 following instructions from CS690 Milestone 2 in the Milestone 2 repo. Prompt me for any questions or validation."
    - Deliverable 2 setup: commit as drafted (AGENTS.md, CLAUDE.md, .claude/ written by Abraham). Fresh-clone check in a scratch folder: approved.
    - Checkpoints: stop at each review the handout requires. Team roles: Abraham led all four areas.
+8. "I have completed step. review and lets proceed to next step" (after the test-writer audit ran in a session started from Milestone-2/)
+   - AC-8 finding: fix the test to go through GET /postings/P/ranked and check the whole pipeline (team commit). Hand recomputation of all six expected values: confirmed by Abraham.
