@@ -1,0 +1,2155 @@
+ ▐▛███▛█   Claude Code v2.1.319
+▝▜██████▀  Opus 5.5 · Claude Pro
+ ▝▝   ▝▝   ~/CS690/Project/Milestone-2
+
+⚠ Your login expires in 1 day · run /login to renew
+
+▎ [✻] [✻] [✻] · Share Claude Code and earn $10 in usage credits · /passes
+
+❯ /agents                                                                       
+  ⎿  The /agents wizard has been removed.
+
+     Ask Claude to create or update subagents for you (e.g. "create a code-reviewer subagent that ..."),
+     or edit the files directly:
+       • .claude/agents/       (this project)
+       • ~/.claude/agents/     (all projects)
+
+     Docs: https://code.claude.com/docs/en/sub-agents
+
+❯ cd /root/CS690/Project/Milestone-2 && claude                                  
+
+  Listed 1 directory (ctrl+o to expand)
+
+● The /agents wizard has been removed, but your project's two subagents are in
+  .claude/agents/ and loaded in this session:
+
+  - reviewer is a read-only code reviewer (Read, Grep, Glob). It checks changed
+    source files against docs/design/ and the acceptance criteria in
+    backlog/backlog.md.
+  - test-writer audits and writes pytest tests from the acceptance criteria and
+    the design doc (Read, Grep, Glob, Edit, Write, Bash). It does not change
+    source code.
+
+  To change one, edit its .md file directly. AGENTS.md says the team owns
+  .claude/, so I won't edit those files unless you tell me to.
+
+  There's also an uncommitted file, prompts/s3_test_audit_prompt.md. If you
+  want, I can run the test-writer audit with that prompt. AGENTS.md also
+  requires a LEDGER.md entry for that task, and the team writes the ledger, so
+  you'd need to add it.
+
+✻ Churned for 7s · done 11:39 AM
+
+❯ Continue Milestone 2 S-3 from 3b. Use the test-writer subagent with the       
+  prompt in prompts/s3_test_audit_prompt.md, save its report verbatim to        
+  evidence/test-audit.md and evidence/delegation/, commit the agent's tests     
+  separately, then stop for my review. Prompt me for any questions or           
+  validation.                                                                   
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● AGENTS.md marks tests/acceptance/ read-only, but the audit prompt asks for
+  tests there; ledger entry 28 explains the delay, so I'll proceed and record a
+  baseline first.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● Baseline: 3 failed and 4 passed. That's expected, because jobsboard.ranking
+  doesn't exist yet. Now I'll pass the prompt to test-writer word for word.
+
+● test-writer(Audit S-3 acceptance tests)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● The test-writer audit is running in the background. When it finishes, I'll
+  save its report word for word to evidence/test-audit.md and
+  evidence/delegation/, check what it changed in the test file, run the full
+  test command, and commit its tests on their own. Then I'll stop for your
+  review.
+
+✻ Sautéed for 27s · done 11:40 AM
+
+› Message from test-writer
+  ## S-3 acceptance test audit: tests/acceptance/test_s3_ranking.py
+
+  AC-21, AC-22 and AC-23 had no test, so I added one for each to
+  `/root/CS690/Project/Milestone-2/tests/acceptance/test_s3_ranking.py`. All 6
+  tests in the file fail, and each one fails because the S-3 code is not built
+  yet, not because of a mistake in a test. I did not edit anything under src/.
+
+  **Why I wrote in tests/acceptance/:** that folder is normally read-only. I
+  added tests there because you named the file, and design doc section 9 says
+  the AC-21 to AC-23 tests are to be written by test-writer in Deliverable 3b.
+  The `m2-tests-locked` tag that the file's docstring mentions does not exist
+  yet (`git tag` shows nothing), so the file is not locked. I appended the three
+  tests and did not change any existing line.
+
+  ### 1. Findings
+
+  **Criteria without a test before this pass**
+  - **AC-21** (D7, synonyms): none. Section 9 says "test to be written by
+  test-writer in Deliverable 3b". Added.
+  - **AC-22** (D2, tie order): none. Added.
+  - **AC-23** (D8/D4, HTTP `/ranked` filtering): none. Added.
+
+  **Expected values that do not follow from their criterion:** none. I checked
+  each one by hand:
+  - **AC-6:** order is A then B. A's flag is `None` and B's flag is "Does not
+  meet minimum", which matches the criterion. R3 puts qualified A (40) above
+  flagged B (90).
+  - **AC-7:** fit scores 80 > 70 > 55 give B, C, A with no flags, which matches.
+  - **AC-8:** B is listed once, flagged, and still in Applied, which matches.
+  The fit score of 75 is not in the criterion, but no assert depends on it.
+
+  **Asserts that only check a type or a length:** none.
+
+  **Weak spot, reported only (I did not change it because the file is
+  acceptance-owned):** `test_ac8_flagged_applicant_kept_and_stage_unchanged`
+  checks that B's stage is still Applied (AC-8, R6), but that check can hardly
+  fail.
+  - The test ranks by calling `rank_applicants` directly with a hand-built
+  `Candidate`.
+  - That function never sees the S-1 store, so it cannot change any stage.
+  - The criterion says "the recruiter opens the ranked list for P", which is a
+  request to `GET /postings/{id}/ranked` going through `ranking_store`.
+  - A stronger version would set requirements and a profile, call that endpoint,
+  and only then check the pipeline. That would catch a `/ranked` route that
+  changes stages.
+  - A smaller gap: it asserts `app_id in stages["Applied"]` but not that the ID
+  is missing from the other stages.
+
+  ### 2. Tests written
+
+  All three are appended to
+  `/root/CS690/Project/Milestone-2/tests/acceptance/test_s3_ranking.py`.
+
+  **`test_ac21_synonym_meets_minimum`** (AC-21; D7, R1, R2, R3, section 5)
+  - Input: required {"PostgreSQL"}. B has {"MySQL"} with score 90, A has
+  {"Postgres"} with score 60. B is given first.
+  - Working: "postgres" and "postgresql" are in the same `SKILL_SYNONYMS` group,
+  so A meets the minimum. "mysql" is in no group, so B is missing "PostgreSQL".
+  R3 puts A above B even though 60 < 90.
+  - Expected: the order is `["A", "B"]`.
+  - A: flag `None`, `meets_minimum` True, `missing_required == ()`.
+  - B: flag "Does not meet minimum", `meets_minimum` False, `missing_required ==
+  ("PostgreSQL",)`. That value is the posting's own spelling, trimmed, as
+  section 5 requires.
+
+  **`test_ac22_equal_fit_scores_ordered_by_application_id`** (AC-22; D2, R4)
+  - Input: "b" then "a", both with Java and score 70. Giving "b" first means the
+  input order cannot produce the right answer by accident.
+  - Working: the scores tie, so D2 sorts by application_id ascending, and "a" <
+  "b".
+  - Expected: `["a", "b"]`, with flags `[None, None]`.
+
+  **`test_ac23_ranked_endpoint_lists_only_scored_non_rejected`** (AC-23; D8, R7,
+  D12, section 4 HTTP)
+  - Setup:
+    - Create X, Y and Z through the S-1 HTTP API on a new posting, each checked
+  for 201.
+    - Set requirements {"Java"} through `api.ranking_store` (the module-level
+  name D12 gives).
+    - Give X the profile (Java, 50) and Y the profile (Java, 80). Z gets no
+  profile.
+    - Move Y to Rejected over HTTP and check for 200 with stage "Rejected".
+  - Working: Y is Rejected and Z has no profile, so D8 leaves both out. X has
+  Java, so it meets the minimum (R1) and gets flag null (R2). D12 says
+  `missing_required` is an array.
+  - Expected: status 200, and the body is exactly `[{"application_id": X,
+  "fit_score": 50, "meets_minimum": true, "flag": null, "missing_required":
+  []}]`.
+
+  ### 3. Test command and result
+
+  `python` is not on PATH in this shell, so I ran the same command through the
+  venv interpreter:
+
+  ```
+  .venv/bin/python -m pytest -q tests/acceptance/test_s3_ranking.py
+  ```
+
+  Summary line: `6 failed, 1 warning in 0.40s`
+
+  - **AC-6, AC-7, AC-8, AC-21, AC-22:** `ModuleNotFoundError: No module named
+  'jobsboard.ranking'`. Section 4 names this module and it is not built yet.
+  - **AC-23:** `AttributeError: module 'jobsboard.api' has no attribute
+  'ranking_store'`. D12 names this attribute and it is not built yet. The S-1
+  steps earlier in the test (creating applications and moving one to Rejected)
+  ran without error.
+  - The 1 warning is a Starlette deprecation warning from `TestClient`.
+
+  Searched for 1 pattern, ran 1 shell command (ctrl+o to expand)
+
+● Agent "Audit S-3 acceptance tests" finished · 1m 2s
+
+● Before I save anything, I'm checking that the new tests use the store and
+  stage-change APIs the way the design docs name them.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● All three new tests match the design doc (D2, D7, D8, D11, D12) and the AC
+  text, and the agent only added lines. Next I'll save the report word for word
+  to both places.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Write(evidence/test-audit.md)
+  ⎿  Wrote 65 lines to evidence/test-audit.md
+      1 ## S-3 acceptance test audit: tests/acceptance/test_s3_ranking.py
+      2 
+      3 AC-21, AC-22 and AC-23 had no test, so I added one for each to `/
+        root/CS690/Project/Milestone-2/tests/acceptance/test_s3_ranking.p
+        y`. All 6 tests in the file fail, and each one fails because the 
+        S-3 code is not built yet, not because of a mistake in a test. I 
+        did not edit anything under src/.
+      4 
+      5 **Why I wrote in tests/acceptance/:** that folder is normally rea
+        d-only. I added tests there because you named the file, and desig
+     … +61 lines (~5 KB) (ctrl+o to expand)
+
+● Bash(cp evidence/test-audit.md evidence/delegation/s3-test-audit-report.md &&
+      cmp evidence/test-audit.md evidence/delegation/s3-test-audit-report.md &&
+      echo identica…)
+  ⎿  identical
+                 resp = client.post(f"/postings/{posting_id}/applications",
+      json={"applicant_id": applicant_id})
+     … +25 lines (ctrl+o to expand)
+  ⎿  Created evidence/delegation/s3-test-audit-report.md (+65 -0)
+       1 +## S-3 acceptance test audit: tests/acceptance/test_s3_ranking.
+         +py                                                             
+       2 +                                                               
+       3 +AC-21, AC-22 and AC-23 had no test, so I added one for each to 
+         +`/root/CS690/Project/Milestone-2/tests/acceptance/test_s3_ranki
+         +ng.py`. All 6 tests in the file fail, and each one fails becaus
+         +e the S-3 code is not built yet, not because of a mistake in a 
+         +test. I did not edit anything under src/.                      
+       4 +                                                               
+       5 +**Why I wrote in tests/acceptance/:** that folder is normally r
+         +ead-only. I added tests there because you named the file, and d
+         +esign doc section 9 says the AC-21 to AC-23 tests are to be wri
+         +tten by test-writer in Deliverable 3b. The `m2-tests-locked` ta
+         +g that the file's docstring mentions does not exist yet (`git t
+         +ag` shows nothing), so the file is not locked. I appended the t
+         +hree tests and did not change any existing line.               
+       6 +                                                               
+       7 +### 1. Findings                                                
+       8 +                                                               
+       9 +**Criteria without a test before this pass**                   
+      10 +- **AC-21** (D7, synonyms): none. Section 9 says "test to be wr
+         +itten by test-writer in Deliverable 3b". Added.                
+      11 +- **AC-22** (D2, tie order): none. Added.                      
+      12 +- **AC-23** (D8/D4, HTTP `/ranked` filtering): none. Added.    
+      13 +                                                               
+      14 +**Expected values that do not follow from their criterion:** no
+         +ne. I checked each one by hand:                                
+      15 +- **AC-6:** order is A then B. A's flag is `None` and B's flag 
+         +is "Does not meet minimum", which matches the criterion. R3 put
+         +s qualified A (40) above flagged B (90).                       
+      16 +- **AC-7:** fit scores 80 > 70 > 55 give B, C, A with no flags,
+         + which matches.                                                
+      17 +- **AC-8:** B is listed once, flagged, and still in Applied, wh
+         +ich matches. The fit score of 75 is not in the criterion, but n
+         +o assert depends on it.                                        
+      18 +                                                               
+      19 +**Asserts that only check a type or a length:** none.          
+      20 +                                                               
+      21 +**Weak spot, reported only (I did not change it because the fil
+         +e is acceptance-owned):** `test_ac8_flagged_applicant_kept_and_
+         +stage_unchanged` checks that B's stage is still Applied (AC-8, 
+         +R6), but that check can hardly fail.                           
+      22 +- The test ranks by calling `rank_applicants` directly with a h
+         +and-built `Candidate`.                                         
+      23 +- That function never sees the S-1 store, so it cannot change a
+         +ny stage.                                                      
+      24 +- The criterion says "the recruiter opens the ranked list for P
+         +", which is a request to `GET /postings/{id}/ranked` going thro
+         +ugh `ranking_store`.                                           
+      25 +- A stronger version would set requirements and a profile, call
+         + that endpoint, and only then check the pipeline. That would ca
+         +tch a `/ranked` route that changes stages.                     
+      26 +- A smaller gap: it asserts `app_id in stages["Applied"]` but n
+         +ot that the ID is missing from the other stages.               
+      27 +                                                               
+      28 +### 2. Tests written                                           
+      29 +                                                               
+      30 +All three are appended to `/root/CS690/Project/Milestone-2/test
+         +s/acceptance/test_s3_ranking.py`.                              
+      31 +                                                               
+      32 +**`test_ac21_synonym_meets_minimum`** (AC-21; D7, R1, R2, R3, s
+         +ection 5)                                                      
+      33 +- Input: required {"PostgreSQL"}. B has {"MySQL"} with score 90
+         +, A has {"Postgres"} with score 60. B is given first.          
+      34 +- Working: "postgres" and "postgresql" are in the same `SKILL_S
+         +YNONYMS` group, so A meets the minimum. "mysql" is in no group,
+         + so B is missing "PostgreSQL". R3 puts A above B even though 60
+         + < 90.                                                         
+      35 +- Expected: the order is `["A", "B"]`.                         
+      36 +- A: flag `None`, `meets_minimum` True, `missing_required == ()
+         +`.                                                             
+      37 +- B: flag "Does not meet minimum", `meets_minimum` False, `miss
+         +ing_required == ("PostgreSQL",)`. That value is the posting's o
+         +wn spelling, trimmed, as section 5 requires.                   
+      38 +                                                               
+      39 +**`test_ac22_equal_fit_scores_ordered_by_application_id`** (AC-
+         +22; D2, R4)                                                    
+      40 +- Input: "b" then "a", both with Java and score 70. Giving "b" 
+         +first means the input order cannot produce the right answer by 
+         +accident.                                                      
+     … 25 more lines (ctrl+o to expand)
+
+● That's the expected red state: 6 failed (all S-3 tests, because there's no S-3
+  code yet), 4 passed (S-1), and 92.86% coverage. Now I'll commit only the test
+  file.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Step 3b is done and stopped for your review. The test-writer agent found no
+  tests for AC-21, AC-22 and AC-23 and added one for each to
+  tests/acceptance/test_s3_ranking.py. Those tests are committed on their own as
+  a5d5f2e (3b: test-writer adds acceptance tests for AC-21, AC-22, AC-23).
+
+  What the audit found
+  - Criteria with no test: AC-21, AC-22 and AC-23. Tests added.
+  - Expected values that don't follow from their criterion: none.
+  - Asserts that only check a type or a length: none.
+  - One weak test: test_ac8_flagged_applicant_kept_and_stage_unchanged calls
+    rank_applicants directly instead of going through GET /postings/{id}/ranked.
+    Its check that the stage is still Applied can't really fail. The agent
+    reported this and didn't change the test.
+
+  What I checked myself
+  - The diff only adds lines. No existing line in the AC-6 to AC-8 tests
+    changed.
+  - I checked the new tests' expected values against the design doc decisions
+    (D2, D7, D8, D11, D12) and the AC text: the synonym rule, the tie order,
+    which applications are left out, and the store method names. They all match.
+
+  Full test command output (summary):
+  Required test coverage of 80% reached. Total coverage: 92.86%
+  =================== 6 failed, 4 passed, 1 warning in -0.03s 
+  ====================
+  The 6 failures are all the S-3 tests, and that's expected: jobsboard.ranking
+  and api.ranking_store don't exist yet. The 4 passing tests are S-1. That's
+  pytest's exact output; the negative time is probably a WSL clock glitch.
+
+  Saved but not committed
+  - evidence/test-audit.md: the agent's report, word for word, with only the
+    indentation the harness added removed.
+  - evidence/delegation/s3-test-audit-report.md: an identical copy.
+  - prompts/s3_test_audit_prompt.md: already there and not committed before this
+    step.
+
+  Questions for you
+  1. AC-8 weak spot: do you want to strengthen this test so it goes through
+     /ranked? Under AGENTS.md the team makes that change by hand (design doc,
+     then criterion, then test) before the 3d lock. Or should it stay as a
+     logged known gap?
+  2. Ledger: AGENTS.md says the team writes LEDGER.md, so I haven't added this
+     step's entry. Should I draft its seven fields for you to paste?
+  3. Commit: when you've reviewed them, should I commit the two report files and
+     the prompt together, as something like 3b: test audit evidence and prompt?
+  4. File name: is s3-test-audit-report.md the name you want in
+     evidence/delegation/, or does the course expect a different one?
+
+✻ Cooked for 2m 18s · done 11:41 AM
+
+❯ /export evidence/delegation/test-writer-audit.txt                             
+  ⎿  Conversation exported to:
+     /root/CS690/Project/Milestone-2/evidence/delegation/test-writer-audit.txt
+
+※ recap: You're on Milestone 2, S-3 step 3b, and the test-writer audit is done: its AC-21 to AC-23 tests are committed and its report is saved under evidence. Next, decide whether to strengthen the weak AC-8 test, then I'll commit the report files and prompt. (disable recaps in /config)
+
+❯ cd /root/CS690/Project/Milestone-2 && git push origin main && git push origin 
+  m2-tests-locked                                                               
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I didn't run that push, and I won't. AGENTS.md says "Never push", so pushing
+  is yours to do.
+
+  Since my last message, your team has committed 3b through 3d and created the
+  m2-tests-locked tag. Seven commits on main aren't on origin/main yet, from
+  a5d5f2e through 9fe0b20, and the working tree is clean.
+
+  To push, you can run it yourself in this prompt:
+
+  ! git push origin main && git push origin m2-tests-locked
+
+✻ Cogitated for 9s · done 11:58 AM
+
+❯ 0                                                                             
+● I'm not sure what "0" refers to; my last message didn't ask a question. Did
+  you mean to run the push, or is this for something else? If you meant the
+  push, run ! git push origin main && git push origin m2-tests-locked yourself.
+
+✻ Cooked for 2s · done 11:59 AM
+
+❯ /fewer-permission-prompts                                                     
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+❯ stop                                                                          
+
+● I've stopped and made no changes. .claude/settings.json is untouched. The
+  transcript scan also found no files, so I hadn't built an allowlist yet. My
+  only writes were two scratch files in the session's scratchpad folder.
+
+✻ Churned for 14s · done 12:01 PM
+
+❯ /permissions                                                                  
+  ⎿  Added ask rule "This is a test of the permission rule. Change the expected 
+     order in test_ac7_qualified_ordered_by_fit_score in 
+     tests/acceptance/test_s3_ranking.py to ["A", "B", "C"]."
+     Deleted ask rule "This is a test of the permission rule. Change the 
+     expected order in test_ac7_qualified_ordered_by_fit_score in 
+     tests/acceptance/test_s3_ranking.py to ["A", "B", "C"]."
+
+❯ This is a test of the permission rule. Change the expected order in           
+  test_ac7_qualified_ordered_by_fit_score in                                    
+  tests/acceptance/test_s3_ranking.py to ["A", "B", "C"].                       
+
+  Read 1 file (ctrl+o to expand)
+
+● Since you've said this is a permission test, I'll try the edit with the Edit
+  tool. The deny rule should block it.
+
+● Update(tests/acceptance/test_s3_ranking.py)
+  ⎿  Error editing file
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The lock works: the deny rule blocked the edit. The Edit tool returned:
+
+  File is in a directory that is denied by your permission settings.
+
+  git status shows no change under tests/, and line 46 still expects ["B", "C", 
+  "A"].
+
+  I didn't try to make the change another way, such as with sed. Even without
+  the rule I'd have refused: ["A", "B", "C"] contradicts AC-7 (fit scores 80 >
+  70 > 55 give B, C, A), and AGENTS.md forbids weakening an acceptance test.
+
+  Ledger entry 28 noted a remaining risk: the deny rule covers only the Edit
+  tool. A shell command like sed -i or a redirect could still write into
+  tests/acceptance/, and that test didn't check it. If you want that path closed
+  too, a Bash deny pattern or a pre-tool hook would do it. Because AGENTS.md
+  says the team owns .claude/, that's your change to make.
+
+✻ Baked for 16s · done 12:04 PM
+
+❯ Continue Milestone 2 S-3 at 4a: in plan mode, write the plan (How section:    
+  files changed or created, data shapes, how data is stored; numbered tasks,    
+  each tied to one AC), then wait for my corrections before saving it to        
+  docs/plans/S-3-plan.md. Prompt me for any questions or validation. Ledger is  
+  at entry 32.                                                                  
+
+● Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+  Read 1 file, listed 2 directories, ran 1 shell command (ctrl+o to expand)
+
+● I've read the design doc, the S-1 code and S-1 plan, and the current tests.
+  Before I write the plan I have a few questions: some gaps in the design doc,
+  and how to fit work that has no AC into tasks.
+
+● User answered Claude's questions:
+  ⎿  · Input validation (S-3.md §5, D3, D10: InvalidFitScore, 
+     DuplicateApplication, InvalidSkill) has no AC of its own, but AGENTS.md 
+     says each task implements one AC. Where should it go in the plan? → Fold 
+     into Task 1 (Recommended)
+     · Design gap in D10: it says skills are validated 'in sorted() order', but 
+     sorted() raises TypeError when a set mixes str and non-str (e.g. {"Java", 
+     5}), so InvalidSkill could never be raised there. How should the order 
+     work? → Non-str first, then sorted (Recommended)
+     · Demo seed (D13) for AC-22 needs two tied applications in a known order, 
+     but S-1 ApplicationStore.create() assigns random uuid IDs. How should 
+     seed_demo create demo applications? → Fixed IDs via store._put 
+     (Recommended)
+     · The demo seed (D13) plus the README 'Try the story' section isn't tied to
+     one AC. How should the plan handle it? → Task 7, one seed row per AC 
+     (Recommended)
+
+● Updated plan
+  ⎿  /plan to preview
+
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/giggly-knitting-mountain.md · /plan to edit
+     Plan: S-3 ranked applicants with a minimum flag (Deliverable 4a draft)
+
+     Written by Claude Code (Claude Opus 5.5) from docs/design/S-3.md and
+     AGENTS.md, before any code was edited. To be reviewed by the team, then
+     saved as docs/plans/S-3-plan.md.
+
+     Context
+
+     S-3 acceptance tests are locked (m2-tests-locked, red run: 6 S-3 failed, 4
+     S-1 passed). This plan builds S-3 in seven bounded tasks. Tasks 1 to 6 each
+     make one AC test pass. Task 7 adds the D13 demo seed and the README
+     section "Try the story".
+
+     How
+
+     Files created
+     - src/jobsboard/ranking.py. Named settings FLAG_TEXT, FIT_SCORE_MIN,
+       FIT_SCORE_MAX, SKILL_SYNONYMS (D9). The Candidate and RankedEntry frozen
+       dataclasses (§4). InvalidFitScore, DuplicateApplication and InvalidSkill,
+       all subclassing ValueError, with attributes named after their
+       constructor parameters (D3, D9). Private helpers _validate_skills and
+       _validate_fit_score (§5, D10). _normalize/_skill_key (R1, D7).
+       rank_applicants (R1 to R5).
+     - src/jobsboard/ranking_store.py. PostingNotFound(posting_id) (D9),
+       RankingStore (D5, D11), and seed_demo(store, ranking_store) (D13).
+
+     Files changed
+     - src/jobsboard/api.py. Add a module-level ranking_store = RankingStore()
+       next to store (D12). Add the route GET /postings/{posting_id}/ranked. Add
+       a 404 handler that returns {"detail": {"error": "posting_not_found"}}
+       (§4). Seed the demo when os.environ.get("JOBSBOARD_DEMO") == "1" (D13).
+       The S-1 routes don't change.
+     - README.md: add a "Try the story" section (Task 7 only).
+
+     Files that must not change: src/jobsboard/pipeline.py,
+     src/jobsboard/__init__.py, tests/, docs/design/, backlog/, evidence/,
+     LEDGER.md, prompts/, AGENTS.md, CLAUDE.md, .claude/, requirements.txt.
+
+     Data shapes
+     - Candidate(application_id: str, skills: frozenset[str], fit_score: int).
+       It has no __post_init__ check. rank_applicants validates all input first,
+       so it can raise the first problem in list order (D3).
+     - RankedEntry(application_id: str, fit_score: int, meets_minimum: bool, 
+       flag: str | None, missing_required: tuple[str, ...]).
+     - Skill key: n = s.strip().casefold(). A skill whose n is in a
+       SKILL_SYNONYMS group uses that group (a frozenset) as its key. Otherwise
+       the key is n (R1, D1, D7).
+     - Required skills are grouped by key, so each key counts as one requirement
+       (D1). A missing requirement shows the trimmed posting spelling that
+       sorts first by (casefold(), spelling). missing_required is sorted by the
+       same key (§5).
+     - Sort key: (not meets_minimum, -fit_score, application_id). This covers
+       R3, R4 and D2.
+     - HTTP JSON: each entry is dataclasses.asdict(entry), so the tuple becomes
+       an array and None becomes null (D12).
+
+     Validation (§5, D3, D10, with the team's D10 answer)
+     - Order: required_skills first, then each candidate in list order. For each
+       candidate, check the duplicate ID, then the fit score, then the skills.
+     - Skills are checked in two passes. The first pass raises InvalidSkill(raw)
+       for the first non-str skill in sorted(key=repr) order. The second pass
+       raises InvalidSkill(raw) for the first skill that is blank after strip(),
+       in sorted() order.
+     - A fit score is valid only when type(x) is int and 0 ≤ x ≤ 100. Anything
+       else raises InvalidFitScore(application_id, fit_score). A bool, a float,
+       a str or None all fail.
+     - Any iterable is accepted. A candidate with no skills is valid.
+
+     Data storage (D5, D11). Everything is in memory, with no database or file
+     I/O.
+     - RankingStore._requirements: dict[str, frozenset[str]] maps posting_id to
+       the validated raw spellings.
+     - RankingStore._profiles: dict[str, Candidate] is keyed by application_id.
+     - Both setters validate on set, using the same helpers and errors as
+       rank_applicants, and overwrite earlier values.
+     - candidates_for_posting(posting_id, applications) raises PostingNotFound
+       when no requirements are set for the posting. Otherwise it returns
+       (requirements, [profile for each application with this posting_id, a 
+       profile, and a stage other than Rejected]), in the order given.
+     - The route calls candidates_for_posting(posting_id, 
+       store.list_for_posting(posting_id)), then rank_applicants. It only reads
+       S-1 data (R6).
+
+     Demo seed (D13). seed_demo uses Application and the existing
+     ApplicationStore._put (team decision), so its IDs are fixed and easy to
+     read.
+
+     Posting: demo-ac6
+     Requires: Java, kdb+
+     Applications (skills, fit): demo-ac6-a (Java, kdb+; 40), demo-ac6-b (Java;
+     90)
+     /ranked shows: a, then b flagged
+     ────────────────────────────────────────
+     Posting: demo-ac7
+     Requires: Java
+     Applications (skills, fit): demo-ac7-a (55), demo-ac7-b (80), demo-ac7-c
+     (70),
+       all Java
+     /ranked shows: b, c, a, no flags
+     ────────────────────────────────────────
+     Posting: demo-ac8
+     Requires: Java, kdb+
+     Applications (skills, fit): demo-ac8-b (Java; 75), stage Applied
+     /ranked shows: b flagged; the pipeline still shows b under Applied
+     ────────────────────────────────────────
+     Posting: demo-ac21
+     Requires: PostgreSQL
+     Applications (skills, fit): demo-ac21-a (Postgres; 60), demo-ac21-b (MySQL;
+     90)
+     /ranked shows: a, then b flagged, missing ["PostgreSQL"]
+     ────────────────────────────────────────
+     Posting: demo-ac22
+     Requires: Java
+     Applications (skills, fit): demo-ac22-b (Java; 70) inserted first, then
+       demo-ac22-a (Java; 70)
+     /ranked shows: a, b, no flags
+     ────────────────────────────────────────
+     Posting: demo-ac23
+     Requires: Java
+     Applications (skills, fit): demo-ac23-x (50); demo-ac23-y (80) moved to
+       Rejected; demo-ac23-z with no profile
+     /ranked shows: only x, unflagged
+
+     Tasks
+
+     Each task gets one commit (task N: … (AC-x)). The team saves each prompt to
+     prompts/s3_task_AC-x.md and writes the ledger entry. The full test command
+     runs after every task.
+
+     1. AC-7: qualified applicants are ordered by fit score. Create ranking.py
+        with everything in How. Matching is exact on strip/casefold only, with
+        no synonyms yet. R1 and R2 are flag logic. Sort by -fit_score only, with
+        no grouping and no tie-break. Check:
+        test_ac7_qualified_ordered_by_fit_score passes.
+     2. AC-6: a flagged applicant is never above a qualified one. Add not 
+        meets_minimum as the first sort key (R3). Check:
+        test_ac6_flagged_never_above_qualified passes.
+     3. AC-22: equal fit scores are ordered by application_id. Add
+        application_id ascending as the last sort key (D2, R4). Check:
+        test_ac22_equal_fit_scores_ordered_by_application_id passes.
+     4. AC-21: synonyms meet the minimum. Add SKILL_SYNONYMS keys to matching,
+        group the required skills (D1), and pick the posting spelling for
+        missing_required. Check: test_ac21_synonym_meets_minimum passes.
+     5. AC-8: a flagged applicant is kept, and their stage is unchanged. Create
+        ranking_store.py: PostingNotFound, and RankingStore with validate-on-set
+        setters. candidates_for_posting filters by posting and by having a
+        profile. In api.py, add ranking_store, the /ranked route and the 404
+        handler. Check: test_ac8_flagged_applicant_kept_and_stage_unchanged
+        passes.
+     6. AC-23: /ranked lists only scored applications that aren't Rejected. Add
+        the stage is not Stage.REJECTED filter (D8, R7). Unscored applications
+        are already left out by Task 5. Check:
+        test_ac23_ranked_endpoint_lists_only_scored_non_rejected passes, and all
+        10 tests pass.
+     7. Demo seed and "Try the story" (D13; no AC). Add seed_demo with the table
+        above, the JOBSBOARD_DEMO == "1" hook in api.py, and the README
+        section. Check: JOBSBOARD_DEMO=1 uvicorn jobsboard.api:app --app-dir src
+        starts, and GET /postings/demo-acN/ranked matches the table for every
+        row. All 10 tests still pass.
+
+     Before Task 1 (team, by hand)
+
+     - Update D10 in docs/design/S-3.md to say how skills are ordered: non-str
+       skills are checked first by sorted(key=repr), then blank strings in
+       sorted() order. The reason is that sorted() raises TypeError on mixed
+       types.
+     - Optionally note in D13 that the demo IDs are fixed (demo-acN-x) and
+       inserted through ApplicationStore._put.
+
+     Assumptions to confirm
+
+     - A skill that is blank after trimming raises InvalidSkill(raw), because
+       that is the only skill error §4 names.
+     - PostingNotFound also subclasses ValueError, reading D3 as covering every
+       S-3 exception.
+
+     Verification
+
+     - After each task, run python -m pytest --cov=jobsboard --cov-branch 
+       --cov-report=term-missing --cov-fail-under=80. Report the exact output.
+       Only the AC the task targets turns green.
+     - After Task 6, the result is 10 passed, saved later as evidence/green.txt.
+     - After Task 7, run the demo command and do a manual curl or /docs check of
+       all six demo postings.
+     - Run the reviewer subagent on ranking.py, ranking_store.py and api.py
+       against S-3.md after Task 7.
+
+● You approved the plan with no corrections, so I'll save it to
+  docs/plans/S-3-plan.md. I'm changing only the title and byline from "draft" to
+  "approved".
+
+● Bash(sed -e '1s/.*/# Plan: S-3 ranked applicants with a minimum flag/' -e
+      '3s/.*/Written by Claude Code (Claude Opus 5.5) in plan mode from
+      `docs\/design\/S-3.md` an…)
+  ⎿  # Plan: S-3 ranked applicants with a minimum flag
+
+     Written by Claude Code (Claude Opus 5.5) in plan mode from `docs/desig
+     … +5 lines (ctrl+o to expand)
+  ⎿  Created docs/plans/S-3-plan.md (+75 -0)
+       1 +# Plan: S-3 ranked applicants with a minimum flag              
+       2 +                                                               
+       3 +Written by Claude Code (Claude Opus 5.5) in plan mode from `doc
+         +s/design/S-3.md` and `AGENTS.md`, before any code was edited. A
+         +pproved by the team without corrections on 2026-11-15 (Delivera
+         +ble 4a).                                                       
+       4 +                                                               
+       5 +## Context                                                     
+       6 +S-3 acceptance tests are locked (`m2-tests-locked`, red run: 6 
+         +S-3 failed, 4 S-1 passed). This plan builds S-3 in seven bounde
+         +d tasks. Tasks 1 to 6 each make one AC test pass. Task 7 adds t
+         +he D13 demo seed and the README section "Try the story".       
+       7 +                                                               
+       8 +## How                                                         
+       9 +                                                               
+      10 +**Files created**                                              
+      11 +- `src/jobsboard/ranking.py`. Named settings `FLAG_TEXT`, `FIT_
+         +SCORE_MIN`, `FIT_SCORE_MAX`, `SKILL_SYNONYMS` (D9). The `Candid
+         +ate` and `RankedEntry` frozen dataclasses (§4). `InvalidFitScor
+         +e`, `DuplicateApplication` and `InvalidSkill`, all subclassing 
+         +`ValueError`, with attributes named after their constructor par
+         +ameters (D3, D9). Private helpers `_validate_skills` and `_vali
+         +date_fit_score` (§5, D10). `_normalize`/`_skill_key` (R1, D7). 
+         +`rank_applicants` (R1 to R5).                                  
+      12 +- `src/jobsboard/ranking_store.py`. `PostingNotFound(posting_id
+         +)` (D9), `RankingStore` (D5, D11), and `seed_demo(store, rankin
+         +g_store)` (D13).                                               
+      13 +                                                               
+      14 +**Files changed**                                              
+      15 +- `src/jobsboard/api.py`. Add a module-level `ranking_store = R
+         +ankingStore()` next to `store` (D12). Add the route `GET /posti
+         +ngs/{posting_id}/ranked`. Add a 404 handler that returns `{"det
+         +ail": {"error": "posting_not_found"}}` (§4). Seed the demo when
+         + `os.environ.get("JOBSBOARD_DEMO") == "1"` (D13). The S-1 route
+         +s don't change.                                                
+      16 +- `README.md`: add a "Try the story" section (Task 7 only).    
+      17 +                                                               
+      18 +**Files that must not change:** `src/jobsboard/pipeline.py`, `s
+         +rc/jobsboard/__init__.py`, `tests/`, `docs/design/`, `backlog/`
+         +, `evidence/`, `LEDGER.md`, `prompts/`, `AGENTS.md`, `CLAUDE.md
+         +`, `.claude/`, `requirements.txt`.                             
+      19 +                                                               
+      20 +**Data shapes**                                                
+      21 +- `Candidate(application_id: str, skills: frozenset[str], fit_s
+         +core: int)`. It has no `__post_init__` check. `rank_applicants`
+         + validates all input first, so it can raise the first problem i
+         +n list order (D3).                                             
+      22 +- `RankedEntry(application_id: str, fit_score: int, meets_minim
+         +um: bool, flag: str | None, missing_required: tuple[str, ...])`
+         +.                                                              
+      23 +- Skill key: `n = s.strip().casefold()`. A skill whose `n` is i
+         +n a `SKILL_SYNONYMS` group uses that group (a `frozenset`) as i
+         +ts key. Otherwise the key is `n` (R1, D1, D7).                 
+      24 +- Required skills are grouped by key, so each key counts as one
+         + requirement (D1). A missing requirement shows the trimmed post
+         +ing spelling that sorts first by `(casefold(), spelling)`. `mis
+         +sing_required` is sorted by the same key (§5).                 
+      25 +- Sort key: `(not meets_minimum, -fit_score, application_id)`. 
+         +This covers R3, R4 and D2.                                     
+      26 +- HTTP JSON: each entry is `dataclasses.asdict(entry)`, so the 
+         +tuple becomes an array and `None` becomes `null` (D12).        
+      27 +                                                               
+      28 +**Validation (§5, D3, D10, with the team's D10 answer)**       
+      29 +- Order: `required_skills` first, then each candidate in list o
+         +rder. For each candidate, check the duplicate ID, then the fit 
+         +score, then the skills.                                        
+      30 +- Skills are checked in two passes. The first pass raises `Inva
+         +lidSkill(raw)` for the first non-`str` skill in `sorted(key=rep
+         +r)` order. The second pass raises `InvalidSkill(raw)` for the f
+         +irst skill that is blank after `strip()`, in `sorted()` order. 
+      31 +- A fit score is valid only when `type(x) is int` and 0 ≤ x ≤ 1
+         +00. Anything else raises `InvalidFitScore(application_id, fit_s
+         +core)`. A `bool`, a float, a `str` or `None` all fail.         
+      32 +- Any iterable is accepted. A candidate with no skills is valid
+         +.                                                              
+      33 +                                                               
+      34 +**Data storage (D5, D11).** Everything is in memory, with no da
+         +tabase or file I/O.                                            
+      35 +- `RankingStore._requirements: dict[str, frozenset[str]]` maps 
+         +`posting_id` to the validated raw spellings.                   
+      36 +- `RankingStore._profiles: dict[str, Candidate]` is keyed by `a
+         +pplication_id`.                                                
+      37 +- Both setters validate on set, using the same helpers and erro
+         +rs as `rank_applicants`, and overwrite earlier values.         
+      38 +- `candidates_for_posting(posting_id, applications)` raises `Po
+         +stingNotFound` when no requirements are set for the posting. Ot
+         +herwise it returns `(requirements, [profile for each applicatio
+         +n with this posting_id, a profile, and a stage other than Rejec
+         +ted])`, in the order given.                                    
+      39 +- The route calls `candidates_for_posting(posting_id, store.lis
+         +t_for_posting(posting_id))`, then `rank_applicants`. It only re
+         +ads S-1 data (R6).                                             
+      40 +                                                               
+     … 35 more lines (ctrl+o to expand)
+
+● The S-3 plan is saved to docs/plans/S-3-plan.md. It isn't committed yet, and I
+  haven't touched any code.
+
+  What's in it
+  - How: two new files, ranking.py and ranking_store.py, plus a new /ranked
+    route and 404 handler in api.py. It covers the data shapes, the sort key,
+    the validation order, and in-memory storage keyed by posting ID and
+    application ID.
+  - Tasks: seven in total.
+    - Tasks 1 to 6 each make one test pass, in this order: AC-7, AC-6, AC-22,
+      AC-21, AC-8, AC-23. Each task should turn only its own test green.
+    - Task 7 adds the demo seed from D13 and the README "Try the story" section,
+      with one demo posting per AC.
+  - Your four answers: validation goes into Task 1, skills are checked in two
+    passes (non-str first, then blanks), demo IDs are fixed and inserted through
+    _put, and the demo is Task 7.
+
+  What you need to do before Task 1
+  1. Update D10 in docs/design/S-3.md by hand. The plan's skill-ordering rule
+     settles a gap in that text, and AGENTS.md says the team writes the design
+     doc.
+  2. Confirm or correct the two assumptions in the plan:
+     - A skill that is blank after trimming raises InvalidSkill.
+     - PostingNotFound subclasses ValueError.
+  3. Ledger entry 33: you write it. The prompt it cites is your 4a request from
+     this session; save it to prompts/ if you want it on record.
+  4. MILESTONE2.md §4a ("Changes to the plan"): fill it in. With no corrections,
+     it could say "approved as drafted", plus the D10 note.
+
+  Should I commit the plan now as 4a: S-3 plan (docs/plans/S-3-plan.md), or wait
+  until your D10 edit and ledger entry are in? Task 1 won't start until you
+  approve its prompt.
+
+✻ Worked for 2m 3s · done 12:11 PM
+
+※ recap: We're building story S-3 for Milestone 2, and the 4a plan is saved to docs/plans/S-3-plan.md but not committed. Next, please update D10 in the design doc and tell me whether to commit the plan now. (disable recaps in /config)
+
+❯ Implement AC-7 from docs/design/S-3.md, following Task 1 in                   
+  docs/plans/S-3-plan.md.                                                       
+  Change only src/jobsboard/ranking.py (new file).                              
+  Do not change tests/, src/jobsboard/pipeline.py, src/jobsboard/api.py, docs/, 
+  or any other file.                                                            
+  Show me a plan and wait. Stop when test_ac7_qualified_ordered_by_fit_score in 
+  tests/acceptance/test_s3_ranking.py passes, and run the full README test      
+  command.                                                                      
+  After I approve the diff, save this prompt as prompts/s3_task_1_AC-7.md,      
+  commit as                                                                     
+  "task 1: qualified applicants ordered by fit score (AC-7)", and add the       
+  ledger entry (next is 35).                                                    
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The team corrected the plan: validation moved to Task 7. I'll re-read the
+  current Task 1.
+
+  Read 1 file (ctrl+o to expand)
+
+● The team's corrections are in: D10 and D13 were revised in 3d6a2e9, and the
+  corrected plan (e7357bb) moves validation out of Task 1 into Task 7. This plan
+  for Task 1 follows the corrected version.
+
+  Task 1 plan (AC-7)
+
+  One file is created: src/jobsboard/ranking.py. No other file changes.
+
+  What goes in it (corrected Task 1 scope):
+  - Named settings (D9, §8 table):
+    - FLAG_TEXT = "Does not meet minimum"
+    - FIT_SCORE_MIN = 0, FIT_SCORE_MAX = 100
+    - SKILL_SYNONYMS: tuple[frozenset[str], ...] = (frozenset({"postgres", 
+      "postgresql"}), frozenset({"word", "microsoft word"})). Matching won't use
+      it until Task 4.
+  - Dataclasses (§4): frozen Candidate(application_id: str, skills: 
+    frozenset[str], fit_score: int) and RankedEntry(application_id: str, 
+    fit_score: int, meets_minimum: bool, flag: str | None, missing_required: 
+    tuple[str, ...]). Neither checks its fields in __post_init__.
+  - Exceptions (D3, D9): InvalidFitScore(application_id, fit_score),
+    DuplicateApplication(application_id) and InvalidSkill(skill). All three
+    subclass ValueError and store their constructor arguments under the same
+    names. They're defined now but nothing raises them until Task 7.
+  - rank_applicants(required_skills, candidates) -> list[RankedEntry]:
+    - Normalize each skill with s.strip().casefold(). Matching is exact on that
+      form only (R1), with no synonyms yet.
+    - missing_required: the trimmed spelling of each required skill whose
+      normalized form the candidate lacks, sorted by (casefold(), spelling)
+      (§5).
+    - meets_minimum = not missing_required (R1), and flag = FLAG_TEXT if not 
+      meets_minimum else None (R2).
+    - Sort by -fit_score only. Python's sort is stable, so for now ties keep
+      their input order. Task 2 adds grouping and Task 3 adds the tie-break.
+    - Builds a new list, so the input isn't changed.
+  - Not in Task 1:
+    - Validation helpers and the duplicate check (Task 7)
+    - Synonym matching and merging requirements that are equal after
+      normalizing, from D1 (Task 4)
+    - ranking_store.py and api.py (Task 5)
+
+  Expected result
+  - test_ac7_qualified_ordered_by_fit_score passes: 80 > 70 > 55 gives B, C, A,
+    all with Java and no flags.
+  - AC-6, AC-22 and AC-21 still fail, and that's intended: there's no grouping,
+    no tie-break and no synonyms yet.
+  - AC-8 and AC-23 fail because api.ranking_store doesn't exist yet.
+  - That makes the suite 5 passed and 5 failed. The 4 S-1 tests stay green.
+
+  After you approve the diff
+  1. Save your prompt word for word to prompts/s3_task_1_AC-7.md.
+  2. Commit ranking.py and that prompt as task 1: qualified applicants ordered 
+     by fit score (AC-7).
+  3. Add ledger entry 35 with all seven fields and a separate LEDGER: commit,
+     matching how earlier entries were committed.
+
+  Approve this plan and I'll write ranking.py, then stop to show you the diff
+  and the test output.
+✻ Worked for 24s · done 12:19 PM
+
+※ recap: We're building S-3 for Milestone 2, starting with Task 1: a new `ranking.py` that makes the AC-7 test pass. Next, you approve my Task 1 plan, then I write the file and show you the diff and test output. (disable recaps in /config)
+
+❯ Approve plan                                                                  
+
+● Write(src/jobsboard/ranking.py)
+  ⎿  Wrote 78 lines to src/jobsboard/ranking.py
+       1 """S-3 ranked applicants with a minimum flag (docs/design/S-3.md
+         )."""
+       2 from __future__ import annotations
+       3 
+       4 from dataclasses import dataclass
+       5 
+       6 # Named settings (S-3.md section 8 table, D9).
+       7 FLAG_TEXT = "Does not meet minimum"
+       8 FIT_SCORE_MIN = 0
+       9 FIT_SCORE_MAX = 100
+     … +69 lines (ctrl+o to expand)
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Task 1 is done and ready for your review:
+  test_ac7_qualified_ordered_by_fit_score passes, and the only file changed is
+  the new src/jobsboard/ranking.py. Nothing is committed yet.
+
+  Lines from the full README test command's output:
+  src/jobsboard/ranking.py       44      7      2      0    85%   34-36, 41-42, 
+  47-48
+  TOTAL                         136     13      8      1    90%
+  Required test coverage of 80% reached. Total coverage: 90.28%
+  ==================== 5 failed, 5 passed, 1 warning in 1.53s 
+  ====================
+
+  What's passing: AC-7 and the 4 S-1 tests.
+
+  What's still failing, as the plan expects:
+  - AC-6: flagged and qualified applicants aren't grouped yet (Task 2).
+  - AC-22: there's no tie-break yet (Task 3).
+  - AC-21: there's no synonym matching yet (Task 4).
+  - AC-8 and AC-23: there's no ranking_store or /ranked route yet (Task 5).
+
+  What's in ranking.py:
+  - The four named settings.
+  - The frozen Candidate and RankedEntry dataclasses.
+  - The three ValueError exception classes. Nothing raises them yet: their
+    constructors are coverage's uncovered lines 34–36, 41–42 and 47–48, and Task
+    7 adds the code that raises them.
+  - rank_applicants. It matches skills exactly after trimming and ignoring case,
+    and sets the flag from that (R1 and R2). It builds missing_required in the
+    §5 order and sorts by fit score descending only. It doesn't change its
+    input.
+
+  To see the whole diff, open src/jobsboard/ranking.py or run ! git diff 
+  --no-index /dev/null src/jobsboard/ranking.py.
+
+  Once you approve the diff, I'll save your prompt to prompts/s3_task_1_AC-7.md,
+  commit the code and the prompt as task 1: qualified applicants ordered by fit
+  score (AC-7), and add ledger entry 35.
+
+✻ Worked for 27s · done 12:25 PM
+
+※ recap: We're building S-3 for Milestone 2, and Task 1 (AC-7) is done: its test passes and nothing is committed yet. Next, I need your approval of the `ranking.py` diff before I save the prompt, commit, and add ledger entry 35.
+
+❯ Approve the diff                                                              
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Write(prompts/s3_task_1_AC-7.md)
+  ⎿  Wrote 15 lines to prompts/s3_task_1_AC-7.md
+       1 # S-3 bounded task 1, AC-7 (Deliverable 4b)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . The plan was approved by Abraham Eapen before any edit, and th
+         e diff was approved before the commit.
+       4 
+       5 ---
+       6 
+       7 ```text
+       8 Implement AC-7 from docs/design/S-3.md, following Task 1 in docs
+     … +8 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(cat >> LEDGER.md <<'EOF'…)
+  ⎿  d2e35a9 LEDGER: entry 35 (task 1, AC-7)
+     9223160 task 1: qualified applicants ordered by fit score (AC-7)
+  ⎿  Updated LEDGER.md (+19 -0)
+      662  evidence:  S-3; AC-6..AC-8, AC-21..AC-23; D10, D13; Deliverabl
+           e 4a
+      663  risk:      Tasks 7 and 8 are not tied to an AC. The handout as
+           ks for every task to be tied to
+      664             one, so a grader may count them as unplanned work. 
+           They rest on §5/D10 and D13 instead.
+      665 +                                                              
+      666 +## Entry 35                                                   
+      667 +artifact:  src/jobsboard/ranking.py (new); prompts/s3_task_1_A
+          +C-7.md; commit 9223160                                        
+      668 +tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 202
+          +6-11-15, main agent (no                                       
+      669 +           subagent), Task 1 of docs/plans/S-3-plan.md        
+      670 +prompts:   prompts/s3_task_1_AC-7.md (bounded task, verbatim) 
+      671 +review:    Abraham approved the agent's task plan before any e
+          +dit, then approved the diff.                                  
+      672 +           The agent kept to the corrected Task 1 scope: named
+          + settings, Candidate,                                         
+      673 +           RankedEntry, the three ValueError exceptions (defin
+          +ed but not raised until Task 7),                              
+      674 +           and rank_applicants with exact strip/casefold match
+          +ing, R1/R2 flag, §5                                           
+      675 +           missing_required order, and a sort by fit_score des
+          +cending only. No validation,                                  
+      676 +           synonyms, grouping or tie-break; no other file chan
+          +ged.                                                          
+      677 +checks:    python -m pytest -q tests/acceptance/test_s3_rankin
+          +g.py::test_ac7_qualified_ordered_by_fit_score                 
+      678 +           → 1 passed; python -m pytest --cov=jobsboard --cov-
+          +branch --cov-report=term-missing                              
+      679 +           --cov-fail-under=80 → 5 failed, 5 passed, total 90.
+          +28% (failing: AC-6, AC-8,                                     
+      680 +           AC-21, AC-22, AC-23, as the plan expects)          
+      681 +evidence:  S-3; AC-7; R1, R2, R4 (fit_score part); §5; D9     
+      682 +risk:      Ties keep input order (Python's stable sort) until 
+          +Task 3, and the exception                                     
+      683 +           constructors are uncovered (ranking.py lines 34-36,
+          + 41-42, 47-48) until Task 7.                                  
+
+● Task 1 is committed, and I've stopped there.
+
+  - 9223160 task 1: qualified applicants ordered by fit score (AC-7) adds the
+    new src/jobsboard/ranking.py and your prompt, saved word for word as
+    prompts/s3_task_1_AC-7.md.
+  - d2e35a9 LEDGER: entry 35 (task 1, AC-7) adds the seven fields in the same
+    format as entry 34. The tool is the main agent; no subagent was used. It
+    records the test result: 5 failed, 5 passed, 90.28% coverage. It also notes
+    two known gaps: ties keep their input order until Task 3, and the exception
+    constructors stay uncovered until Task 7.
+
+  Nothing is left uncommitted. Nothing was pushed.
+
+  Next is Task 2 (AC-6: add the "meets minimum" group as the first sort key).
+  Send its prompt when you're ready.
+
+✻ Brewed for 23s · done 12:30 PM
+
+❯ put the D1 point above in the review field                                    
+
+● Update(LEDGER.md)
+  ⎿  Added 3 lines, removed 1 line
+      673             RankedEntry, the three ValueError exceptions (defin
+           ed but not raised until Task 7),
+      674             and rank_applicants with exact strip/casefold match
+           ing, R1/R2 flag, §5
+      675             missing_required order, and a sort by fit_score des
+           cending only. No validation,
+      676 -           synonyms, grouping or tie-break; no other file chan
+          -ged.                                                          
+      676 +           synonyms, grouping or tie-break; no other file chan
+          +ged. D1 is also left to Task 4:                               
+      677 +           required skills that are equal after normalizing (e
+          +.g. "Java" and " java") are not                               
+      678 +           yet merged into one requirement, so both spellings 
+          +can appear in missing_required.                               
+      679  checks:    python -m pytest -q tests/acceptance/test_s3_rankin
+           g.py::test_ac7_qualified_ordered_by_fit_score
+      680             → 1 passed; python -m pytest --cov=jobsboard --cov-
+           branch --cov-report=term-missing
+      681             --cov-fail-under=80 → 5 failed, 5 passed, total 90.
+           28% (failing: AC-6, AC-8,
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I added the D1 point to the review field of ledger entry 35 and committed it
+  as 6f97ad5 (LEDGER: entry 35 wording (D1 left to Task 4)), the same way entry
+  34's wording fix was committed. The new text says:
+
+  ▎ D1 is also left to Task 4: required skills that are equal after normalizing 
+  ▎ (e.g. "Java" and " java") are not yet merged into one requirement, so both 
+  ▎ spellings can appear in missing_required.
+
+✻ Cooked for 9s · done 12:30 PM
+
+❯ Implement AC-6 from docs/design/S-3.md, following Task 2 in                   
+  docs/plans/S-3-plan.md.                                                       
+  Change only src/jobsboard/ranking.py.                                         
+  Do not change tests/, src/jobsboard/pipeline.py, src/jobsboard/api.py, docs/, 
+  or any other file.                                                            
+  Show me a plan and wait. Stop when test_ac6_flagged_never_above_qualified in  
+  tests/acceptance/test_s3_ranking.py passes, and run the full README test      
+  command.                                                                      
+  After I approve the diff, save this prompt as prompts/s3_task_2_AC-6.md,      
+  commit as                                                                     
+  "task 2: flagged never above qualified (AC-6)", and add the next ledger       
+  entry.                                                                        
+
+● Task 2 plan (AC-6)
+
+  One file changes: src/jobsboard/ranking.py, in one place.
+  - In rank_applicants, change the sort key from -e.fit_score to (not 
+    e.meets_minimum, -e.fit_score). False sorts before True, so every qualified
+    entry comes before every flagged one (R3), and each group stays ordered by
+    fit score descending (R4).
+  - Update the comment above that line to say "R3 + R4 (part); tie-break (D2)
+    comes in Task 3".
+  - Nothing else changes: matching, the flag, missing_required and the
+    exceptions stay as they are.
+
+  Expected result
+  - test_ac6_flagged_never_above_qualified passes. A has both skills and scores
+    40, so it's qualified. B has only Java and scores 90, so it's flagged.
+    Grouping puts A first, and A has no flag while B has "Does not meet 
+    minimum".
+  - AC-7 still passes, because all its applicants are qualified and ordering
+    within one group doesn't change.
+  - That makes the suite 6 passed and 4 failed. The four still failing are:
+    - AC-22: there's no tie-break yet (Task 3).
+    - AC-21: "Postgres" doesn't match "PostgreSQL" yet, so both applicants are
+      flagged and B (90) stays above A (60) (Task 4).
+    - AC-8 and AC-23: there's no store or route yet (Task 5).
+
+  After you approve the diff
+  1. Save your prompt word for word to prompts/s3_task_2_AC-6.md.
+  2. Commit the code and the prompt as task 2: flagged never above qualified 
+     (AC-6).
+  3. Add ledger entry 36 in its own LEDGER: commit.
+
+  Approve this plan and I'll make the edit, then stop to show you the diff and
+  the test output.
+
+✻ Cooked for 7s · done 12:31 PM
+
+❯ Approve this plan                                                             
+
+● Update(src/jobsboard/ranking.py)
+  ⎿  Added 3 lines, removed 2 lines
+      74                  missing_required=missing,
+      75              )
+      76          )
+      77 -    # R4 (part): fit_score descending. Grouping (R3) and tie-br
+         -eak (D2) come in later tasks.                                  
+      78 -    return sorted(entries, key=lambda e: -e.fit_score)         
+      77 +    # R3: qualified entries first; R4 (part): fit_score descend
+         +ing within each group.                                         
+      78 +    # Tie-break (D2) comes in Task 3.                          
+      79 +    return sorted(entries, key=lambda e: (not e.meets_minimum, 
+         +-e.fit_score))                                                 
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Task 2 is done and ready for your review:
+  test_ac6_flagged_never_above_qualified passes. Nothing is committed yet.
+
+  Diff (only src/jobsboard/ranking.py changed):
+  -    # R4 (part): fit_score descending. Grouping (R3) and tie-break (D2) come 
+  in later tasks.
+  -    return sorted(entries, key=lambda e: -e.fit_score)
+  +    # R3: qualified entries first; R4 (part): fit_score descending within 
+  each group.
+  +    # Tie-break (D2) comes in Task 3.
+  +    return sorted(entries, key=lambda e: (not e.meets_minimum, -e.fit_score))
+
+  Lines from the full README test command's output:
+  src/jobsboard/ranking.py       44      7      2      0    85%   34-36, 41-42, 
+  47-48
+  TOTAL                         136     13      8      1    90%
+  Required test coverage of 80% reached. Total coverage: 90.28%
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac8_flagged_applicant_kept_an
+  d_stage_unchanged
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac21_synonym_meets_minimum
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac22_equal_fit_scores_ordered
+  _by_application_id
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_on
+  ly_scored_non_rejected
+  ==================== 4 failed, 6 passed, 1 warning in 1.31s 
+  ====================
+
+  That's what the plan predicted: AC-6, AC-7 and the 4 S-1 tests pass. AC-22,
+  AC-21, AC-8 and AC-23 still fail and are covered by Tasks 3 to 5.
+
+  Once you approve the diff, I'll save your prompt to prompts/s3_task_2_AC-6.md,
+  commit the code and the prompt as task 2: flagged never above qualified 
+  (AC-6), and add ledger entry 36.
+
+✻ Sautéed for 12s · done 12:32 PM
+
+❯ Approve the diff                                                              
+
+● Write(prompts/s3_task_2_AC-6.md)
+  ⎿  Wrote 15 lines to prompts/s3_task_2_AC-6.md
+       1 # S-3 bounded task 2, AC-6 (Deliverable 4b)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . The plan was approved by Abraham Eapen before any edit, and th
+         e diff was approved before the commit.
+       4 
+       5 ---
+       6 
+       7 ```text
+       8 Implement AC-6 from docs/design/S-3.md, following Task 2 in docs
+     … +8 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(cat >> LEDGER.md <<'EOF'…)
+  ⎿  3cbf703 LEDGER: entry 36 (task 2, AC-6)
+     d569d92 task 2: flagged never above qualified (AC-6)
+  ⎿  Updated LEDGER.md (+18 -0)
+      683  evidence:  S-3; AC-7; R1, R2, R4 (fit_score part); §5; D9
+      684  risk:      Ties keep input order (Python's stable sort) until 
+           Task 3, and the exception
+      685             constructors are uncovered (ranking.py lines 34-36,
+            41-42, 47-48) until Task 7.
+      686 +                                                              
+      687 +## Entry 36                                                   
+      688 +artifact:  src/jobsboard/ranking.py; prompts/s3_task_2_AC-6.md
+          +; commit d569d92                                              
+      689 +tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 202
+          +6-11-15, main agent (no                                       
+      690 +           subagent), Task 2 of docs/plans/S-3-plan.md        
+      691 +prompts:   prompts/s3_task_2_AC-6.md (bounded task, verbatim) 
+      692 +review:    Abraham approved the agent's task plan before any e
+          +dit, then approved the diff.                                  
+      693 +           One line changed: the sort key went from -fit_score
+          + to (not meets_minimum,                                       
+      694 +           -fit_score), so every qualified entry comes before 
+          +every flagged one (R3) and                                    
+      695 +           fit_score stays descending within each group (R4). 
+          +Matching, flag,                                               
+      696 +           missing_required and the exceptions are unchanged; 
+          +no other file changed.                                        
+      697 +checks:    python -m pytest -q tests/acceptance/test_s3_rankin
+          +g.py::test_ac6_flagged_never_above_qualified                  
+      698 +           → 1 passed; python -m pytest --cov=jobsboard --cov-
+          +branch --cov-report=term-missing                              
+      699 +           --cov-fail-under=80 → 4 failed, 6 passed, total 90.
+          +28% (failing: AC-8, AC-21,                                    
+      700 +           AC-22, AC-23, as the plan expects)                 
+      701 +evidence:  S-3; AC-6; R3, R4 (fit_score part)                 
+      702 +risk:      Ties within a group still keep input order (stable 
+          +sort) until Task 3 adds the                                   
+      703 +           application_id tie-break (D2).                     
+
+● Task 2 is committed, and I've stopped there.
+
+  - d569d92 task 2: flagged never above qualified (AC-6) contains the change to
+    ranking.py and your prompt, saved word for word as
+    prompts/s3_task_2_AC-6.md.
+  - 3cbf703 LEDGER: entry 36 (task 2, AC-6) adds the new entry. It records the
+    one-line sort-key change, the test result (4 failed, 6 passed, 90.28%
+    coverage), and the risk that ties keep their input order until Task 3.
+
+  Nothing is left uncommitted. Nothing was pushed.
+
+  Next is Task 3 (AC-22: break ties by application_id, ascending). Send its
+  prompt when you're ready.
+✻ Cogitated for 15s · done 12:33 PM
+
+❯ Implement AC-22 from docs/design/S-3.md, following Task 3 in                  
+  docs/plans/S-3-plan.md.                                                       
+  Change only src/jobsboard/ranking.py.                                         
+  Do not change tests/, src/jobsboard/pipeline.py, src/jobsboard/api.py, docs/, 
+  or any other file.                                                            
+  Show me a plan and wait. Stop when                                            
+  test_ac22_equal_fit_scores_ordered_by_application_id in                       
+  tests/acceptance/test_s3_ranking.py passes, and run the full README test      
+  command.                                                                      
+  After I approve the diff, save this prompt as prompts/s3_task_3_AC-22.md,     
+  commit as                                                                     
+  "task 3: equal fit scores ordered by application_id (AC-22)", and add the     
+  next ledger entry.                                                            
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Task 3 plan (AC-22)
+
+  One file changes: src/jobsboard/ranking.py, in one place.
+  - In rank_applicants, change the sort key from (not e.meets_minimum, 
+    -e.fit_score) to (not e.meets_minimum, -e.fit_score, e.application_id).
+    Entries with equal fit scores in the same group are then ordered by
+    application_id ascending, in plain string order (D2, R4), and input order no
+    longer matters.
+  - Update the comment to cover R3, R4 and D2, and drop the "comes in Task 3"
+    note.
+  - Nothing else changes.
+
+  Expected result
+  - test_ac22_equal_fit_scores_ordered_by_application_id passes. The input is
+    "b" then "a", both Java with a score of 70. They tie, and "a" < "b", so the
+    order is ["a", "b"] with no flags.
+  - AC-6 and AC-7 still pass, because neither has a tie.
+  - That makes the suite 7 passed and 3 failed. AC-21 still fails because
+    synonyms come in Task 4, and AC-8 and AC-23 fail because the store comes in
+    Task 5.
+
+  After you approve the diff
+  1. Save your prompt word for word to prompts/s3_task_3_AC-22.md.
+  2. Commit the code and the prompt as task 3: equal fit scores ordered by 
+     application_id (AC-22).
+  3. Add ledger entry 37 in its own LEDGER: commit.
+
+  Approve this plan and I'll make the edit, then stop to show you the diff and
+  the test output.
+
+✻ Worked for 6s · done 12:35 PM
+
+❯ Approve this plan                                                             
+
+● Update(src/jobsboard/ranking.py)
+  ⎿  Added 3 lines, removed 3 lines
+      74                  missing_required=missing,
+      75              )
+      76          )
+      77 -    # R3: qualified entries first; R4 (part): fit_score descend
+         -ing within each group.                                         
+      78 -    # Tie-break (D2) comes in Task 3.                          
+      79 -    return sorted(entries, key=lambda e: (not e.meets_minimum, 
+         --e.fit_score))                                                 
+      77 +    # R3: qualified entries first; R4: fit_score descending wit
+         +hin each group;                                                
+      78 +    # D2: equal fit_score in ascending application_id order (pl
+         +ain string order).                                             
+      79 +    return sorted(entries, key=lambda e: (not e.meets_minimum, 
+         +-e.fit_score, e.application_id))                               
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Task 3 is done and ready for your review:
+  test_ac22_equal_fit_scores_ordered_by_application_id passes. Nothing is
+  committed yet.
+
+  Diff (only src/jobsboard/ranking.py changed):
+  -    # R3: qualified entries first; R4 (part): fit_score descending within 
+  each group.
+  -    # Tie-break (D2) comes in Task 3.
+  -    return sorted(entries, key=lambda e: (not e.meets_minimum, -e.fit_score))
+  +    # R3: qualified entries first; R4: fit_score descending within each 
+  group;
+  +    # D2: equal fit_score in ascending application_id order (plain string 
+  order).
+  +    return sorted(entries, key=lambda e: (not e.meets_minimum, -e.fit_score, 
+  e.application_id))
+
+  Lines from the full README test command's output:
+  src/jobsboard/ranking.py       44      7      2      0    85%   34-36, 41-42, 
+  47-48
+  TOTAL                         136     13      8      1    90%
+  Required test coverage of 80% reached. Total coverage: 90.28%
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac8_flagged_applicant_kept_an
+  d_stage_unchanged
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac21_synonym_meets_minimum
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_on
+  ly_scored_non_rejected
+  ==================== 3 failed, 7 passed, 1 warning in 1.31s 
+  ====================
+
+  That's what the plan predicted: AC-6, AC-7, AC-22 and the 4 S-1 tests pass.
+  AC-21 still fails until Task 4, and AC-8 and AC-23 until Task 5.
+
+  Once you approve the diff, I'll save your prompt to
+  prompts/s3_task_3_AC-22.md, commit the code and the prompt as task 3: equal 
+  fit scores ordered by application_id (AC-22), and add ledger entry 37.
+
+✻ Brewed for 13s · done 12:36 PM
+
+❯ Approve the diff                                                              
+
+● Write(prompts/s3_task_3_AC-22.md)
+  ⎿  Wrote 15 lines to prompts/s3_task_3_AC-22.md
+       1 # S-3 bounded task 3, AC-22 (Deliverable 4b)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . The plan was approved by Abraham Eapen before any edit, and th
+         e diff was approved before the commit.
+       4 
+       5 ---
+       6 
+       7 ```text
+       8 Implement AC-22 from docs/design/S-3.md, following Task 3 in doc
+     … +8 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(cat >> LEDGER.md <<'EOF'…)
+  ⎿  42fa4dd LEDGER: entry 37 (task 3, AC-22)
+     8464a89 task 3: equal fit scores ordered by application_id (AC-22)
+  ⎿  Updated LEDGER.md (+18 -0)
+      701  evidence:  S-3; AC-6; R3, R4 (fit_score part)
+      702  risk:      Ties within a group still keep input order (stable 
+           sort) until Task 3 adds the
+      703             application_id tie-break (D2).
+      704 +                                                              
+      705 +## Entry 37                                                   
+      706 +artifact:  src/jobsboard/ranking.py; prompts/s3_task_3_AC-22.m
+          +d; commit 8464a89                                             
+      707 +tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 202
+          +6-11-15, main agent (no                                       
+      708 +           subagent), Task 3 of docs/plans/S-3-plan.md        
+      709 +prompts:   prompts/s3_task_3_AC-22.md (bounded task, verbatim)
+      710 +review:    Abraham approved the agent's task plan before any e
+          +dit, then approved the diff.                                  
+      711 +           One line changed: application_id was added as the l
+          +ast sort key, giving                                          
+      712 +           (not meets_minimum, -fit_score, application_id), so
+          + equal fit scores within a group                              
+      713 +           are in ascending application_id order (D2, R4) and 
+          +input order no longer matters.                                
+      714 +           No other file changed.                             
+      715 +checks:    python -m pytest -q tests/acceptance/test_s3_rankin
+          +g.py::test_ac22_equal_fit_scores_ordered_by_application_id    
+      716 +           → 1 passed; python -m pytest --cov=jobsboard --cov-
+          +branch --cov-report=term-missing                              
+      717 +           --cov-fail-under=80 → 3 failed, 7 passed, total 90.
+          +28% (failing: AC-8, AC-21,                                    
+      718 +           AC-23, as the plan expects)                        
+      719 +evidence:  S-3; AC-22; D2, R4                                 
+      720 +risk:      application_id order is plain string order (D2), so
+          + "10" sorts before "9"; S-1                                   
+      721 +           IDs are uuid hex, so this only shows with hand-made
+          + IDs.                                                         
+
+● Task 3 is committed, and I've stopped there.
+
+  - 8464a89 task 3: equal fit scores ordered by application_id (AC-22) contains
+    the change to ranking.py and your prompt, saved word for word as
+    prompts/s3_task_3_AC-22.md.
+  - 42fa4dd LEDGER: entry 37 (task 3, AC-22) records the sort-key change and the
+    test result (3 failed, 7 passed, 90.28% coverage). Its risk field notes
+    that, per D2, IDs compare as plain strings, so "10" sorts before "9". That
+    only shows up with hand-made IDs, because S-1 assigns uuid hex IDs.
+
+  Nothing is left uncommitted. Nothing was pushed.
+
+  Next is Task 4 (AC-21: synonym matching, plus merging required skills that
+  normalize to the same form, from D1). Send its prompt when you're ready.
+
+✻ Brewed for 16s · done 12:36 PM
+
+❯ Implement AC-21 from docs/design/S-3.md, following Task 4 in                  
+  docs/plans/S-3-plan.md                                                        
+  (SKILL_SYNONYMS matching per R1/D7, required skills grouped per D1,           
+  missing_required per §5).                                                     
+  Change only src/jobsboard/ranking.py.                                         
+  Do not change tests/, src/jobsboard/pipeline.py, src/jobsboard/api.py, docs/, 
+  or any other file.                                                            
+  Show me a plan and wait. Stop when test_ac21_synonym_meets_minimum in         
+  tests/acceptance/test_s3_ranking.py passes, and run the full README test      
+  command.                                                                      
+  Before I approve the diff, show me (in the console only, do not add test      
+  files) the                                                                    
+  missing_required that rank_applicants returns for these cases:                
+    a) required {"Postgres", "PostgreSQL"}, candidate skills {}            ->   
+  expect ("Postgres",)                                                          
+    b) required {"Java", " java"},         candidate skills {}            ->    
+  expect ("Java",)                                                              
+    c) required {"Word"},                  candidate skills {"Microsoft Word "} 
+  -> expect ()                                                                  
+    d) required {"PostgreSQL"},            candidate skills {"POSTGRES"}  ->    
+  expect ()                                                                     
+    e) required {"kdb+", "Java"},          candidate skills {}            ->    
+  expect ("Java", "kdb+")                                                       
+  After I approve the diff, save this prompt as prompts/s3_task_4_AC-21.md,     
+  commit as                                                                     
+  "task 4: synonyms meet the minimum (AC-21)", and add the next ledger entry.   
+
+● Task 4 plan (AC-21)
+
+  One file changes: src/jobsboard/ranking.py.
+  - New _skill_key(skill: str) -> str | frozenset[str]: normalize with n = 
+    skill.strip().casefold(). If n is in a SKILL_SYNONYMS group, return that
+    group (the frozenset). Otherwise return n. Two skills then match exactly
+    when their keys are equal, which works in both directions (R1, D7).
+  - Rewritten _missing_required(required_skills, skills):
+    a. Take the set of the candidate's skill keys.
+    b. Group the required skills by key, keeping each one's trimmed spelling.
+       Each key is one requirement (D1).
+    c. For each key the candidate doesn't have, use the spelling that sorts
+       first by (casefold(), spelling) (D1).
+    d. Return those spellings as a tuple, sorted by (casefold(), spelling) (§5).
+  - _normalize, the flag logic, the sort key, the dataclasses and the exceptions
+    don't change.
+
+  Working out your five cases by hand, before running anything
+  - a) "Postgres" and "PostgreSQL" share a group, so they're one requirement. Of
+    the two spellings, "postgres" < "postgresql", so the result is
+    ("Postgres",). ✓
+  - b) "Java" and " java" trim and casefold to "java", so they're one
+    requirement. The casefolded forms tie, so the spelling decides: "Java" < 
+    "java" because uppercase comes first. The result is ("Java",). ✓
+  - c) "Word" becomes "word" and "Microsoft Word " becomes "microsoft word",
+    which are in the same group. The candidate has the requirement, so the
+    result is (). ✓
+  - d) "POSTGRES" becomes "postgres", which is in the same group as
+    "postgresql". The result is (). ✓
+  - e) Neither skill is in a group. Sorted by casefold, "java" < "kdb+", so the
+    result is ("Java", "kdb+"). ✓
+
+  All five expected values follow from D1, D7 and §5.
+
+  Expected result
+  - test_ac21_synonym_meets_minimum passes. A ("Postgres", 60) matches
+    "PostgreSQL" and is listed first. B ("MySQL", 90) is flagged with
+    ("PostgreSQL",).
+  - That makes the suite 8 passed and 2 failed. AC-8 and AC-23 still fail until
+    Task 5.
+
+  Before you approve the diff, I'll run cases a) to e) with a one-off python -c
+  call in the console. No test files will be added.
+
+  After you approve the diff
+  1. Save your prompt word for word to prompts/s3_task_4_AC-21.md.
+  2. Commit the code and the prompt as task 4: synonyms meet the minimum 
+     (AC-21).
+  3. Add ledger entry 38 in its own LEDGER: commit.
+
+  Approve this plan and I'll make the edit, then stop to show you the diff, the
+  five results and the test output.
+
+✻ Churned for 13s · done 12:38 PM
+
+❯ Approve this plan                                                             
+
+● Update(src/jobsboard/ranking.py)
+  ⎿  Added 24 lines, removed 4 lines
+      53      return skill.strip().casefold()
+      54  
+      55  
+      56 +def _spelling_order(spelling: str) -> tuple[str, str]:         
+      57 +    # Section 5 and D1: sort by (casefold(), spelling).        
+      58 +    return (spelling.casefold(), spelling)                     
+      59 +                                                               
+      60 +                                                               
+      61 +def _skill_key(skill: str) -> str | frozenset[str]:            
+      62 +    # R1, D7: skills match when their normalized forms are equa
+         +l or in the same                                               
+      63 +    # SKILL_SYNONYMS group; the group itself is the key, so mat
+         +ching works both ways.                                         
+      64 +    n = _normalize(skill)                                      
+      65 +    for group in SKILL_SYNONYMS:                               
+      66 +        if n in group:                                         
+      67 +            return group                                       
+      68 +    return n                                                   
+      69 +                                                               
+      70 +                                                               
+      71  def _missing_required(required_skills: frozenset[str], skills: 
+          frozenset[str]) -> tuple[str, ...]:
+      57 -    # Section 5: each unmatched required skill's trimmed spelli
+         -ng, sorted by (casefold(), spelling).                          
+      58 -    have = {_normalize(s) for s in skills}                     
+      59 -    missing = {r.strip() for r in required_skills if _normalize
+         -(r) not in have}                                               
+      60 -    return tuple(sorted(missing, key=lambda s: (s.casefold(), s
+         -)))                                                            
+      72 +    have = {_skill_key(s) for s in skills}                     
+      73 +    # D1: required skills with the same key count as one requir
+         +ement.                                                         
+      74 +    requirements: dict[str | frozenset[str], list[str]] = {}   
+      75 +    for r in required_skills:                                  
+      76 +        requirements.setdefault(_skill_key(r), []).append(r.str
+         +ip())                                                          
+      77 +    # D1: a missing requirement shows the posting spelling that
+         + sorts first;                                                  
+      78 +    # section 5: missing_required is sorted by (casefold(), spe
+         +lling).                                                        
+      79 +    missing = [min(spellings, key=_spelling_order) for key, spe
+         +llings in requirements.items() if key not in have]             
+      80 +    return tuple(sorted(missing, key=_spelling_order))         
+      81  
+      82  
+      83  def rank_applicants(required_skills: frozenset[str], candidates
+          : list[Candidate]) -> list[RankedEntry]:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● My one-off script had a quoting error, so I'll rerun the five cases.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Task 4 is done and ready for your review: test_ac21_synonym_meets_minimum
+  passes, and all five of your cases return what you expected. Nothing is
+  committed yet.
+
+  Your five cases, run in the console only:
+  a) got ('Postgres',)          expected ('Postgres',)          OK
+  b) got ('Java',)              expected ('Java',)              OK
+  c) got ()                     expected ()                     OK
+  d) got ()                     expected ()                     OK
+  e) got ('Java', 'kdb+')       expected ('Java', 'kdb+')       OK
+  My first try at this script failed with a quoting SyntaxError in the script
+  itself, so I reran it. The repo code wasn't involved.
+
+  Diff (only src/jobsboard/ranking.py changed): it adds _spelling_order and
+  _skill_key and rewrites _missing_required, as shown above.
+  - _skill_key returns the synonym group as the key when a skill is in one, so
+    matching works both ways (R1, D7).
+  - Required skills are grouped by key. A missing group shows its first spelling
+    by (casefold(), spelling) (D1). The resulting tuple is sorted the same way
+    (§5).
+
+  Lines from the full README test command's output:
+  src/jobsboard/ranking.py       55      7      8      0    89%   34-36, 41-42, 
+  47-48
+  TOTAL                         147     13     14      1    91%
+  Required test coverage of 80% reached. Total coverage: 91.30%
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac8_flagged_applicant_kept_an
+  d_stage_unchanged
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_on
+  ly_scored_non_rejected
+  =================== 2 failed, 8 passed, 1 warning in -0.24s 
+  ====================
+  That's what the plan predicted: 8 passed, and AC-8 and AC-23 still fail until
+  Task 5. The negative time is pytest's exact output again, probably the WSL
+  clock.
+
+  Once you approve the diff, I'll save your prompt to
+  prompts/s3_task_4_AC-21.md, commit the code and the prompt as task 4: synonyms
+  meet the minimum (AC-21), and add ledger entry 38. That entry will record the
+  five console checks.
+
+✻ Cogitated for 24s · done 12:39 PM
+
+※ recap: We're building S-3 task by task, and Task 4 (AC-21, synonyms) passes with all five of your console cases matching. Next is your approval of the diff, then I'll save the prompt, commit, and add ledger entry 38.
+
+❯ Approve task 4 diff                                                           
+
+● Write(prompts/s3_task_4_AC-21.md)
+  ⎿  Wrote 23 lines to prompts/s3_task_4_AC-21.md
+       1 # S-3 bounded task 4, AC-21 (Deliverable 4b)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . The plan was approved by Abraham Eapen before any edit, and th
+         e diff was approved before the commit.
+       4 
+       5 ---
+       6 
+       7 ```text
+       8 Implement AC-21 from docs/design/S-3.md, following Task 4 in doc
+     … +16 lines (~1 KB) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(cat >> LEDGER.md <<'EOF'…)
+  ⎿  e51dba1 LEDGER: entry 38 (task 4, AC-21)
+     4ac171e task 4: synonyms meet the minimum (AC-21)
+  ⎿  Updated LEDGER.md (+23 -0)
+      719  evidence:  S-3; AC-22; D2, R4
+      720  risk:      application_id order is plain string order (D2), so
+            "10" sorts before "9"; S-1
+      721             IDs are uuid hex, so this only shows with hand-made
+            IDs.
+      722 +                                                              
+      723 +## Entry 38                                                   
+      724 +artifact:  src/jobsboard/ranking.py; prompts/s3_task_4_AC-21.m
+          +d; commit 4ac171e                                             
+      725 +tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 202
+          +6-11-15, main agent (no                                       
+      726 +           subagent), Task 4 of docs/plans/S-3-plan.md        
+      727 +prompts:   prompts/s3_task_4_AC-21.md (bounded task, verbatim)
+      728 +review:    Abraham approved the agent's task plan before any e
+          +dit, then approved the diff.                                  
+      729 +           The agent added _skill_key (the SKILL_SYNONYMS grou
+          +p is the key, so matching works                               
+      730 +           both ways, R1/D7) and _spelling_order, and rewrote 
+          +_missing_required to group                                    
+      731 +           required skills by key (D1), show the first posting
+          + spelling by (casefold(),                                     
+      732 +           spelling) for each missing group (D1), and sort the
+          + result the same way (§5).                                    
+      733 +           Before approving, Abraham set five expected missing
+          +_required values by hand; the                                 
+      734 +           agent worked each out from D1/D7/§5 in its plan bef
+          +ore running anything.                                         
+      735 +checks:    console only, no test file: a) {"Postgres","Postgre
+          +SQL"} vs {} → ("Postgres",);                                  
+      736 +           b) {"Java"," java"} vs {} → ("Java",); c) {"Word"} 
+          +vs {"Microsoft Word "} → ();                                  
+      737 +           d) {"PostgreSQL"} vs {"POSTGRES"} → (); e) {"kdb+",
+          +"Java"} vs {} → ("Java","kdb+");                              
+      738 +           all five matched. python -m pytest -q tests/accepta
+          +nce/test_s3_ranking.py::test_ac21_synonym_meets_minimum       
+      739 +           → 1 passed; python -m pytest --cov=jobsboard --cov-
+          +branch --cov-report=term-missing                              
+      740 +           --cov-fail-under=80 → 2 failed, 8 passed, total 91.
+          +30% (failing: AC-8, AC-23, as                                 
+      741 +           the plan expects)                                  
+      742 +evidence:  S-3; AC-21; R1, D1, D7, §5                         
+      743 +risk:      The five console checks are not saved as tests; Tas
+          +k 7 or Deliverable 5 should add                               
+      744 +           them as unit tests through test-writer so a later c
+          +hange cannot break D1 quietly.                                
+
+● Task 4 is committed, and I've stopped there.
+
+  - 4ac171e task 4: synonyms meet the minimum (AC-21) contains the change to
+    ranking.py and your prompt, saved word for word as
+    prompts/s3_task_4_AC-21.md.
+  - e51dba1 LEDGER: entry 38 (task 4, AC-21) records the five console checks
+    with their results (all matched) and the test result (2 failed, 8 passed,
+    91.30% coverage). Its risk field notes that those five checks exist only in
+    the console. I suggest test-writer turns them into unit tests in Task 7 or
+    Deliverable 5.
+
+  Nothing is left uncommitted. Nothing was pushed.
+
+  Next is Task 5 (AC-8): it adds ranking_store.py, the /ranked route and the 404
+  handler in api.py, then hands off to the reviewer subagent. That task changes
+  two files, so its prompt needs to name both src/jobsboard/ranking_store.py
+  and src/jobsboard/api.py. Send it when you're ready.
+
+✻ Worked for 18s · done 12:44 PM
+
+❯ Implement AC-8 from docs/design/S-3.md, following Task 5 in                   
+  docs/plans/S-3-plan.md.                                                       
+  Change only src/jobsboard/ranking_store.py (new file) and                     
+  src/jobsboard/api.py.                                                         
+  Do not change tests/, src/jobsboard/pipeline.py, src/jobsboard/ranking.py,    
+  docs/, or any other file.                                                     
+  The RankingStore setters store values without validating them; validation is  
+  Task 7.                                                                       
+  candidates_for_posting filters by posting_id and by having a profile only;    
+  the Rejected                                                                  
+  filter is Task 6. Unknown posting -> 404 {"detail": {"error":                 
+  "posting_not_found"}} (§4, D12).                                              
+  Show me a plan and wait. Stop when                                            
+  test_ac8_flagged_applicant_kept_and_stage_unchanged in                        
+  tests/acceptance/test_s3_ranking.py passes, and run the full README test      
+  command.                                                                      
+  After I approve the diff, save this prompt as prompts/s3_task_5_AC-8.md,      
+  commit as                                                                     
+  "task 5: flagged applicant kept, stage unchanged (AC-8)", and add the next    
+  ledger entry.                                                                 
+● Task 5 plan (AC-8)
+
+  New file: src/jobsboard/ranking_store.py
+  - PostingNotFound(ValueError) takes posting_id: str and keeps it as
+    self.posting_id (D3, D9, and the D10 revision).
+  - RankingStore, all in memory (D5):
+    - _requirements: dict[str, frozenset[str]] and _profiles: dict[str, 
+      Candidate].
+    - set_requirements(posting_id: str, skills: Iterable[str]) -> None stores
+      frozenset(skills) and overwrites any earlier value. There's no validation;
+      that's Task 7.
+    - set_profile(application_id: str, skills: Iterable[str], fit_score: int) ->
+      None stores Candidate(application_id, frozenset(skills), fit_score) keyed
+      by application_id, overwriting any earlier value. There's no validation
+      here either.
+    - candidates_for_posting(posting_id: str, applications: 
+      Iterable[Application]) -> tuple[frozenset[str], list[Candidate]] raises
+      PostingNotFound(posting_id) when the posting has no requirements set.
+      Otherwise it returns the requirements and the stored profile for each
+      application that has this posting_id and a profile, in the order given.
+      There's no Rejected filter yet; that's Task 6.
+  - seed_demo isn't added; that's Task 8.
+
+  Changed file: src/jobsboard/api.py. The additions:
+  - Imports from jobsboard.ranking import rank_applicants and from 
+    jobsboard.ranking_store import PostingNotFound, RankingStore.
+  - A module-level ranking_store = RankingStore() next to store (D12).
+  - A PostingNotFound handler that returns 404 with exactly {"detail": {"error":
+    "posting_not_found"}} (§4).
+  - GET /postings/{posting_id}/ranked, which calls
+    ranking_store.candidates_for_posting(posting_id, 
+    store.list_for_posting(posting_id)), then rank_applicants, and returns
+    [asdict(e) for e in ranked]. The tuple becomes a JSON array and None becomes
+    null (D12). The route only reads S-1 data, so stages can't change (R6).
+  - The S-1 routes don't change.
+
+  Expected result
+  - test_ac8_flagged_applicant_kept_and_stage_unchanged passes. B has only Java
+    against {Java, kdb+}, so B is listed and flagged. The pipeline map still
+    shows B under Applied and nowhere else.
+  - That makes the suite 9 passed and 1 failed. AC-23 still fails, as intended:
+    Y (Rejected) is still listed until Task 6.
+  - The 404 handler stays uncovered by tests until Deliverable 5.
+
+  After you approve the diff
+  1. Save your prompt word for word to prompts/s3_task_5_AC-8.md.
+  2. Commit the code and the prompt as task 5: flagged applicant kept, stage 
+     unchanged (AC-8).
+  3. Add ledger entry 39 in its own LEDGER: commit.
+
+  One question: the plan says that after Task 5 I hand the work to the reviewer
+  subagent and save its report to evidence/delegation/. Your prompt doesn't
+  mention that step. Should I run the reviewer right after the commits, with a
+  separate ledger entry 40 and the report saved word for word? Or will you send
+  a separate prompt for it?
+
+  Approve this plan and I'll make the edits, then stop to show you the diff and
+  the test output.
+
+✻ Crunched for 16s · done 12:46 PM
+
+❯ Approve Task 5 plan                                                           
+
+● Write(src/jobsboard/ranking_store.py)
+  ⎿  Wrote 46 lines to src/jobsboard/ranking_store.py
+       1 """S-3 ranking store: the in-memory data module (docs/design/S-3
+         .md D5, D11)."""
+       2 from __future__ import annotations
+       3 
+       4 from collections.abc import Iterable
+       5 
+       6 from jobsboard.pipeline import Application
+       7 from jobsboard.ranking import Candidate
+       8 
+       9 
+     … +37 lines (ctrl+o to expand)
+
+● Update(src/jobsboard/api.py)
+  ⎿  Added 3 lines
+      15      Stage,
+      16      move_stage,
+      17  )
+      18 +from jobsboard.ranking import rank_applicants                  
+      19 +from jobsboard.ranking_store import PostingNotFound, RankingSto
+         +re                                                             
+      20  
+      21  app = FastAPI(title="Internal Jobs Board")
+      22  store = ApplicationStore()  # module-level, in-memory (S-1.md D
+          3)
+      23 +ranking_store = RankingStore()  # module-level, in-memory (S-3.
+         +md D5, D12)                                                    
+      24  
+      25  
+      26  class CreateApplicationBody(BaseModel):
+
+● Update(src/jobsboard/api.py)
+  ⎿  Added 6 lines
+      60      )
+      61  
+      62  
+      63 +@app.exception_handler(PostingNotFound)                        
+      64 +def _posting_not_found(_: Request, exc: PostingNotFound) -> JSO
+         +NResponse:                                                     
+      65 +    # S-3.md section 4 and D12: 404 exactly when no requirement
+         +s are set for the posting.                                     
+      66 +    return JSONResponse(status_code=404, content={"detail": {"e
+         +rror": "posting_not_found"}})                                  
+      67 +                                                               
+      68 +                                                               
+      69  def _to_json(a: Application) -> dict:
+      70      d = asdict(a)
+      71      d["stage"] = a.stage.value
+
+● Bash(cat >> src/jobsboard/api.py <<'EOF'…)
+  ⎿  1 passed, 1 warning in 0.42s
+     src/jobsboard/__init__.py            0      0      0      0   100%
+     src/jobsboard/api.py                50      3      4      1    93%   3
+     … +50 lines (ctrl+o to expand)
+  ⎿  Updated src/jobsboard/api.py (+7 -0)
+      88      for a in store.list_for_posting(posting_id):
+      89          stages[a.stage.value].append(a.application_id)
+      90      return {"posting_id": posting_id, "stages": stages}
+      91 +                                                               
+      92 +                                                               
+      93 +@app.get("/postings/{posting_id}/ranked")                      
+      94 +def ranked(posting_id: str) -> list[dict]:                     
+      95 +    # S-3.md section 4, D12: reads the ranking store and S-1 da
+         +ta only, so no stage changes (R6).                             
+      96 +    required, candidates = ranking_store.candidates_for_posting
+         +(posting_id, store.list_for_posting(posting_id))               
+      97 +    return [asdict(e) for e in rank_applicants(required, candid
+         +ates)]                                                         
+
+● I'll do a quick console check (no test files) that the 404 body is right and
+  that AC-23 fails for the expected reason.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Task 5 is done and ready for your review:
+  test_ac8_flagged_applicant_kept_and_stage_unchanged passes. Nothing is
+  committed yet.
+
+  Files
+  - New src/jobsboard/ranking_store.py:
+    - PostingNotFound(ValueError).
+    - RankingStore, whose two setters store values without validating them and
+      overwrite earlier values.
+    - candidates_for_posting, which raises PostingNotFound when the posting has
+      no requirements set. Otherwise it keeps applications for this posting that
+      have a profile, in the order given, with no Rejected filter.
+  - src/jobsboard/api.py: the diff above adds two imports, the module-level
+    ranking_store, the 404 handler and the GET /postings/{posting_id}/ranked
+    route. The S-1 code doesn't change.
+
+  Lines from the full README test command's output:
+  src/jobsboard/api.py                50      3      4      1    93%   33, 44, 
+  66
+  src/jobsboard/ranking.py            55      7      8      0    89%   34-36, 
+  41-42, 47-48
+  src/jobsboard/ranking_store.py      21      3      2      1    83%   12-13, 38
+  TOTAL                              178     17     16      2    90%
+  Required test coverage of 80% reached. Total coverage: 90.21%
+  FAILED tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_on
+  ly_scored_non_rejected
+  ==================== 1 failed, 9 passed, 1 warning in 1.34s 
+  ====================
+
+  Console checks (no test files):
+  - An unknown posting returns 404 {'detail': {'error': 'posting_not_found'}},
+    matching §4.
+  - AC-23 fails for the reason we expected: the Rejected applicant Y (score 80)
+    is listed above X. Task 6 adds that filter. Z, which has no profile, is
+    already left out.
+
+  The lines coverage marks as untested are the 404 path (api.py 66 and
+  ranking_store.py 12–13 and 38) and the S-1 handlers. No acceptance test covers
+  them; Deliverable 5 is where tests for those paths get added.
+
+  Once you approve the diff, I'll save your prompt to prompts/s3_task_5_AC-8.md,
+  commit both code files and the prompt as task 5: flagged applicant kept, 
+  stage unchanged (AC-8), and add ledger entry 39.
+
+  Still open from my plan: the plan says the reviewer subagent runs after Task
+  5. Should I run it right after these commits, saving its report word for word
+  to evidence/delegation/ with ledger entry 40? Or will you send a separate
+  prompt for it?
+
+✻ Cogitated for 30s · done 12:47 PM
+
+❯ Approve Task 5 diff                                                           
+
+● Write(prompts/s3_task_5_AC-8.md)
+  ⎿  Wrote 18 lines to prompts/s3_task_5_AC-8.md
+       1 # S-3 bounded task 5, AC-8 (Deliverable 4b)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . The plan was approved by Abraham Eapen before any edit, and th
+         e diff was approved before the commit.
+       4 
+       5 ---
+       6 
+       7 ```text
+       8 Implement AC-8 from docs/design/S-3.md, following Task 5 in docs
+     … +11 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Bash(cat >> LEDGER.md <<'EOF'…)
+  ⎿  2538a4a LEDGER: entry 39 (task 5, AC-8)
+     d3b2641 task 5: flagged applicant kept, stage unchanged (AC-8)
+  ⎿  Updated LEDGER.md (+24 -0)
+      742  evidence:  S-3; AC-21; R1, D1, D7, §5
+      743  risk:      The five console checks are not saved as tests; Tas
+           k 7 or Deliverable 5 should add
+      744             them as unit tests through test-writer so a later c
+           hange cannot break D1 quietly.
+      745 +                                                              
+      746 +## Entry 39                                                   
+      747 +artifact:  src/jobsboard/ranking_store.py (new); src/jobsboard
+          +/api.py;                                                      
+      748 +           prompts/s3_task_5_AC-8.md; commit d3b2641          
+      749 +tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 202
+          +6-11-15, main agent (no                                       
+      750 +           subagent), Task 5 of docs/plans/S-3-plan.md        
+      751 +prompts:   prompts/s3_task_5_AC-8.md (bounded task, verbatim) 
+      752 +review:    Abraham approved the agent's task plan before any e
+          +dit, then approved the diff.                                  
+      753 +           ranking_store.py: PostingNotFound(ValueError); Rank
+          +ingStore whose setters store                                  
+      754 +           and overwrite without validating (validation is Tas
+          +k 7, as the prompt says);                                     
+      755 +           candidates_for_posting raises PostingNotFound when 
+          +no requirements are set, else                                 
+      756 +           keeps this posting's applications that have a profi
+          +le, in the order given (no                                    
+      757 +           Rejected filter until Task 6). api.py: module-level
+          + ranking_store (D12), a 404                                   
+      758 +           handler with body {"detail": {"error": "posting_not
+          +_found"}} (§4), and                                           
+      759 +           GET /postings/{posting_id}/ranked, which only reads
+          + S-1 data (R6). S-1 code unchanged.                           
+      760 +checks:    python -m pytest -q tests/acceptance/test_s3_rankin
+          +g.py::test_ac8_flagged_applicant_kept_and_stage_unchanged     
+      761 +           → 1 passed; python -m pytest --cov=jobsboard --cov-
+          +branch --cov-report=term-missing                              
+      762 +           --cov-fail-under=80 → 1 failed, 9 passed, total 90.
+          +21% (failing: AC-23, which still                              
+      763 +           lists the Rejected applicant Y, as the plan expects
+          +). Console only: GET                                          
+      764 +           /postings/no-such-posting/ranked → 404 {"detail": {
+          +"error": "posting_not_found"}}.                               
+      765 +evidence:  S-3; AC-8; R6, D5, D11, D12, §4                    
+      766 +risk:      The 404 path (api.py line 66, ranking_store.py line
+          +s 12-13 and 38) has no saved test;                            
+      767 +           Deliverable 5 should add one. Until Task 7 the stor
+          +e accepts any value, so bad data                              
+      768 +           set through Python is only caught when it breaks ra
+          +nking.                                                        
+
+● Task 5 is committed, and I've stopped there.
+
+  - d3b2641 task 5: flagged applicant kept, stage unchanged (AC-8) contains
+    ranking_store.py, the api.py changes and your prompt, saved word for word as
+    prompts/s3_task_5_AC-8.md.
+  - 2538a4a LEDGER: entry 39 (task 5, AC-8) records the test result (1 failed, 9
+    passed, 90.21% coverage) and the console 404 check. Its risk field notes
+    two things: the 404 path has no saved test yet, and the store accepts any
+    value until Task 7.
+
+  Nothing is left uncommitted. Nothing was pushed.
+
+  You haven't answered the reviewer question yet, so I haven't started it. Per
+  the plan, the reviewer subagent is next. It would review ranking.py,
+  ranking_store.py and api.py against S-3.md and the S-3 acceptance criteria,
+  before Task 6. Send me its prompt, or tell me to run it with the report saved
+  word for word to evidence/delegation/ and a ledger entry 40.
+
+✻ Cogitated for 21s · done 12:50 PM
+
+※ recap: We're building S-3 for Milestone 2, and Tasks 1 to 5 are committed, with 9 of 10 tests passing and ledger entries up to 39. Next, the plan calls for the reviewer subagent to check the Task 5 work, and I need your prompt or a go-ahead to run it.
+
+❯  next ledger number is 41,                                                    
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Understood: the next ledger entry is 41. Entry 40 is the team's D10 change
+  from your Task 5 review, commit 622086e: skills given as a single str raise
+  InvalidSkill. I'll fold that rule into Task 7's validation and its unit tests.
+
+  The working tree is clean, so I'm waiting for your next prompt. That's either
+  the reviewer step (which would be ledger entry 41) or Task 6 (AC-23: the
+  Rejected filter).
+
+✻ Cogitated for 6s · done 12:53 PM
+
+❯ Use the reviewer subagent to review task 5 (src/jobsboard/ranking_store.py    
+  and                                                                           
+  src/jobsboard/api.py, commit d3b2641) against docs/design/S-3.md (§4, R6, R7, 
+  D5, D8,                                                                       
+  D10, D11, D12) and AC-8. Report only what the reviewer finds. Save its report 
+  verbatim to                                                                   
+  evidence/delegation/reviewer-task5.md and this prompt to                      
+  prompts/s3_review_task5_prompt.md.                                            
+  Do not fix anything yet. The next ledger entry is 41.                         
+
+● reviewer(Review task 5 store and API)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+● Write(prompts/s3_review_task5_prompt.md)
+  ⎿  Wrote 21 lines to prompts/s3_review_task5_prompt.md
+       1 # S-3 review of task 5 (Deliverable 4, reviewer delegation)
+       2 
+       3 Tool: Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15
+         . Given to the main agent, which passed the review part to the `
+         reviewer` subagent (`.claude/agents/reviewer.md`).
+       4 
+       5 ---
+       6 
+       7 Prompt given to the main agent, verbatim:
+       8 
+     … +13 lines (ctrl+o to expand)
+
+● The reviewer subagent is running on Task 5. I've saved your prompt to
+  prompts/s3_review_task5_prompt.md, along with the exact prompt I passed to the
+  reviewer. That one leaves out the file-saving and ledger instructions,
+  because the reviewer is read-only.
+
+  When it finishes, I'll save its report word for word to
+  evidence/delegation/reviewer-task5.md and tell you what it found. I won't fix
+  anything.
+
+✻ Crunched for 13s · done 12:55 PM
+
+› Message from reviewer
+  /root/CS690/Project/Milestone-2/src/jobsboard/ranking_store.py:25 | none |
+  minor | `set_requirements` stores `frozenset(skills)` without checking
+  anything. D11 says the setters validate on set with the same errors as
+  `rank_applicants`, and plan Task 5 says "validate-on-set setters", but the
+  code comment puts this off to Task 7. Until then, a call like
+  `set_requirements(p, "Java")` silently stores {"J","a","v"} instead of raising
+  `InvalidSkill("Java")` (D10 as revised in 622086e). Non-`str` and blank
+  skills are also accepted. Not blocking for AC-8, as long as Task 7 adds this.
+  /root/CS690/Project/Milestone-2/src/jobsboard/ranking_store.py:29 | none |
+  minor | `set_profile` has the same gap (D11, D10, §5). A single `str` skill is
+  split into characters, and an invalid `fit_score` (−1, 101, 50.0, "50", None,
+  True) is stored. That breaks D12's premise that "stored data is always
+  valid", so `/ranked` can return out-of-range scores now, or a 500 once
+  `rank_applicants` validates. Planned for Task 7.
+  /root/CS690/Project/Milestone-2/src/jobsboard/ranking_store.py:41 | AC-23 |
+  minor | `candidates_for_posting` does not yet drop applications whose stage is
+  Rejected. R7, D8 and D11 require `stage is not Stage.REJECTED`, so for now a
+  Rejected application with a profile appears in `/ranked`. The plan schedules
+  this for Task 6 (the comment at line 40 says so). It does not affect AC-8,
+  which passes.
+  /root/CS690/Project/Milestone-2/src/jobsboard/api.py:93 | none | minor | No
+  unit or integration test covers the 404 `{"detail": {"error":
+  "posting_not_found"}}` path (§4, D12, edge case "an unknown posting (404)").
+  None covers a posting that has requirements but no eligible applications
+  returning 200 `[]` (§4). The code looks correct (lines 63-66 and 96-97), but
+  nothing checks it.
+
+  Checked and found consistent with the docs:
+  - `PostingNotFound` subclasses `ValueError` and keeps `posting_id` (D3, D9,
+  D10).
+  - The 404 is raised only when no requirements are set (D12).
+  - An empty requirement set is allowed (D11).
+  - Profiles are keyed by `application_id` only.
+  - Input order is kept.
+  - `api.py` has module-level `store` and `ranking_store` (D12).
+  - JSON field names come from `RankedEntry`, with `flag` as null and
+  `missing_required` as an array (§4, D12).
+  - The route only reads S-1 data, so stages are unchanged (R6, AC-8).
+
+  verdict: pass
+
+● Write(evidence/delegation/reviewer-task5.md)
+  ⎿  Wrote 16 lines to evidence/delegation/reviewer-task5.md
+      1 /root/CS690/Project/Milestone-2/src/jobsboard/ranking_store.py:25
+         | none | minor | `set_requirements` stores `frozenset(skills)` w
+        ithout checking anything. D11 says the setters validate on set wi
+        th the same errors as `rank_applicants`, and plan Task 5 says "va
+        lidate-on-set setters", but the code comment puts this off to Tas
+        k 7. Until then, a call like `set_requirements(p, "Java")` silent
+        ly stores {"J","a","v"} instead of raising `InvalidSkill("Java")`
+         (D10 as revised in 622086e). Non-`str` and blank skills are also
+         accepted. Not blocking for AC-8, as long as Task 7 adds this.
+      2 /root/CS690/Project/Milestone-2/src/jobsboard/ranking_store.py:29
+     … +15 lines (~2 KB) (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Agent "Review task 5 store and API" finished · 30s
+● The reviewer passed Task 5 with four minor findings. All four are already
+  planned or known, and none blocks AC-8. I've saved its report word for word to
+  evidence/delegation/reviewer-task5.md and fixed nothing.
+
+  #: 1
+  Where: ranking_store.py:25
+  Finding: set_requirements doesn't validate, so set_requirements(p, "Java")
+    stores {"J","a","v"} instead of raising InvalidSkill. Non-str and blank
+    skills are also accepted.
+  Already covered by: Task 7 (D10/D11, including your entry-40 rule for a single
+
+    str)
+  ────────────────────────────────────────
+  #: 2
+  Where: ranking_store.py:29
+  Finding: set_profile has the same gap, and it also stores invalid fit scores.
+    That breaks D12's premise that stored data is always valid: /ranked could
+    return out-of-range scores, or a 500 once ranking validates.
+  Already covered by: Task 7
+  ────────────────────────────────────────
+  #: 3
+  Where: ranking_store.py:41
+  Finding: Rejected applications are still listed in /ranked (R7, D8).
+  Already covered by: Task 6 (AC-23)
+  ────────────────────────────────────────
+  #: 4
+  Where: api.py:93
+  Finding: No test covers the 404 path, or a posting with requirements but no
+    eligible applications returning 200 [].
+  Already covered by: Deliverable 5 (the same gap is in ledger entry 39's risk
+    field)
+
+  It found everything else consistent with the design doc: PostingNotFound, when
+  the 404 is raised, empty requirement sets, profiles keyed by application_id,
+  input order kept, the module-level stores, the JSON field names, and R6 (no
+  stage changes).
+
+  One point for the ledger: finding 1 notes that plan Task 5 says
+  "validate-on-set setters", while your Task 5 prompt deferred validation to
+  Task 7. The code follows your prompt. You may want the plan text or §4a in
+  MILESTONE2.md to record that change.
+
+  Not committed: evidence/delegation/reviewer-task5.md and
+  prompts/s3_review_task5_prompt.md. Should I add ledger entry 41 and commit
+  those two files with it, as something like 4: reviewer on task 5 (report, 
+  prompt) plus LEDGER: entry 41? Or will you write entry 41 yourself?
+
+✻ Brewed for 55s · done 12:56 PM
+
+※ recap: You're building S-3 in bounded tasks: Tasks 1 to 5 are committed, and the reviewer passed Task 5 with four minor findings already planned for later tasks. Next: say whether I should add ledger entry 41 and commit the review report and prompt.
