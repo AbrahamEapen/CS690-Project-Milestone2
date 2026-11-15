@@ -652,8 +652,8 @@ prompts:   prompts/s3_plan_prompt.md (write the plan); prompts/m2_session_prompt
            (review the plan)
 review:    Abraham crossed out "everything in How" from Task 1, because it bundled all §5/D3/D10
            validation into the AC-7 task without a test, and made validation its own Task 7,
-           with test-writer unit tests first. He moved the reviewer delegation from after the
-           last task to after Task 5, the first task that touches the store and S-1 data. He
+           with test-writer unit tests first. Abraham moved the reviewer delegation from after the
+           last task to after Task 5, the first task that touches the store and S-1 data. Abraham
            rejected the plan's line "approved without corrections" and its claim that _put
            was already a team decision; the D10/D13 points were settled in the doc first
            (entry 33, 3d6a2e9).
