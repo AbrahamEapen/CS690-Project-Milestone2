@@ -1107,3 +1107,22 @@ evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 6
 risk:      A single headless pass with no findings is weak evidence of correctness. The
            reviewer is a model, and this run was not repeated. modelUsage shows a small
            claude-haiku-5-5 call whose purpose is not visible in the JSON.
+
+## Entry 56
+artifact:  evidence/screens/ (ac6, ac7, ac8-ranked, ac8-pipeline, ac21, ac22, ac23, empty, 404 .png);
+           scripts/capture_screens.py (4f)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, with Playwright 1.x
+           and Chrome Headless Shell 159 installed in a scratch venv (not in requirements.txt)
+prompts:   prompts/m2_session_prompts.md item 21 (capture the 4f screenshots)
+review:    No browser was installed in WSL. Abraham approved installing Playwright, Chromium and
+           its apt dependencies (libatomic1 and others) outside the project. Each screenshot is
+           one real request made through the app's own Swagger UI (/docs, "Try it out" →
+           "Execute") against JOBSBOARD_DEMO=1 uvicorn on port 8000, so it shows the request
+           URL, status code and response body. None was edited. ac6, 404 and ac8-pipeline were
+           opened and checked against AC-6, the §4 404 body, and AC-8 (demo-ac8-b only under
+           Applied).
+checks:    capture script → 9 files saved; uvicorn log shows the matching GET requests
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; §4 empty and error states; Deliverable 4f
+risk:      Swagger UI loads its JavaScript from a CDN, so recapturing needs network access. The
+           screenshots show the API through Swagger, not a recruiter-facing page, because S-3
+           has no UI in this milestone.

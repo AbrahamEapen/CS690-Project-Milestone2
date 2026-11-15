@@ -40,3 +40,4 @@ through the agent's multiple-choice questions are listed after each request.
 19. "Lets work on reflection. prompt me with drafts options ..." — declined: the handout requires the team's own writing (AI may polish wording only); gave a structure and evidence list instead.
 20. "Review following draft and polishing wording if need. add an evidence if required." (Abraham's draft pasted)
    - Agent flagged four factual mismatches with the evidence (F1 deliberate permission test, F2 diff check, F3 37 vs 39 sub-count, F4 D10/D11/D13 settled during the build); Abraham approved the polished version with those fixes and the disclosure line.
+21. "are you able to capture screenshots for 4f and update evidence screens folder ?" — approved installing a headless browser in the scratchpad.
