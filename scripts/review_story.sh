@@ -12,6 +12,6 @@ docs/design/S-3.md and its acceptance criteria.
 Report only what the reviewer finds. Files: $FILES"
 
 claude -p "$PROMPT" --output-format json \
-  --json-schema "$(cat agent/review-schema.json)" > evidence/headless-review.json
+  --json-schema "$(cat agent/review-schema.json)" < /dev/null > evidence/headless-review.json
 
 echo "Saved evidence/headless-review.json (report in its structured_output field)."

@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "S-3 headless review report",
   "type": "object",
   "additionalProperties": false,
