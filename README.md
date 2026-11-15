@@ -61,17 +61,24 @@ Without `JOBSBOARD_DEMO=1`, nothing is seeded and every `demo-` posting returns 
 
 ## Repository map
 
-| Path | What it holds | Deliverable |
-| --- | --- | --- |
-| `docs/proposal_followup.md` | Approval items and scope changes since the proposal | 1 |
-| `docs/interviews/` | Interview questions, raw notes INT-01 to INT-05, participation table, compliments and predictions, lesson learned | 2 |
-| `evidence/evidence_log.md` | E, A, and Q evidence log | 3 |
-| `backlog/backlog.md` | Stories S-1 to S-14, evidence trace, INVEST, AC-1 to AC-20, ranking and cut line | 4 |
-| `docs/design/` | Design docs `S-1.md` and `S-3.md`, gap-check replies and adjudication | 5 |
-| `docs/plans/S-1-plan.md` | Agent-written build plan for S-1 | 6c |
-| `src/jobsboard/` | Application code | 6d |
-| `tests/` | Acceptance tests (AC ID in each test name) | 6b |
-| `traceability/traceability.csv` | Evidence → story → AC → test | 7 |
-| `LEDGER.md`, `prompts/` | Provenance ledger and every prompt it references | 8 |
-| `report/REPORT.md` | Source for the submitted PDF | all |
-| `AGENTS.md` | Standing instructions for the AI coding tool | 6a |
+Milestone 2 (S-3) deliverables are mapped in `MILESTONE2.md`; this is where things live.
+
+| Path | What it holds |
+| --- | --- |
+| `MILESTONE2.md` | Milestone 2 report: deliverables map, story, audit answers, plan changes, test strength, headless review, reflection |
+| `AGENTS.md`, `CLAUDE.md` | Standing instructions for the coding agent (`CLAUDE.md` imports `AGENTS.md`) |
+| `.claude/settings.json`, `.claude/agents/` | Permission rules (incl. the `tests/acceptance/` lock) and the `test-writer` and `reviewer` subagents |
+| `src/jobsboard/` | S-1 `pipeline.py`; S-3 `ranking.py`, `ranking_store.py` (in-memory data module, demo seed); `api.py` (both stories' routes) |
+| `tests/acceptance/` | Locked S-3 acceptance tests (tag `m2-tests-locked`) |
+| `tests/test_s1_pipeline.py` | S-1 acceptance tests (Milestone 1) |
+| `tests/unit/`, `tests/integration/`, `tests/property/` | S-3 validation and edge-case, integration and Hypothesis property tests |
+| `pyproject.toml`, `pytest.ini` | Coverage threshold, mutmut configuration, pytest settings |
+| `docs/design/` | Design docs `S-1.md`, `S-3.md`; gap checks (`S-3-gap-check-2.md`) and adjudications |
+| `docs/plans/` | Build plans `S-1-plan.md`, `S-3-plan.md` |
+| `backlog/backlog.md`, `evidence/evidence_log.md`, `docs/interviews/` | Stories and AC IDs; E/A/Q evidence; interview notes |
+| `traceability/traceability.csv` | Evidence → story → AC → test |
+| `evidence/` | Tool output: red/green/refactor runs, coverage, mutation, permission proof, test audit, delegation transcripts, headless review, screenshots |
+| `scripts/`, `agent/` | Headless review script and its JSON schema; screenshot capture script |
+| `LEDGER.md`, `prompts/` | Provenance ledger and every prompt it references |
+| `contribution/` | Signed contribution statements |
+| `report/` | Milestone 1 report source and PDF |
