@@ -523,3 +523,26 @@ checks:    every row in the marks table names a section or decision that exists 
 evidence:  S-3; AC-6..AC-8, AC-21..AC-23
 risk:      The 30 resolutions were checked against the doc text, not by a second gap-check
            run, so new gaps could come from D9–D13 themselves.
+
+## Entry 28
+artifact:  AGENTS.md, CLAUDE.md, .claude/settings.json, .claude/agents/test-writer.md,
+           .claude/agents/reviewer.md, requirements.txt, README.md (test command); commit
+           <see git log: "2: agent setup">
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (fresh-clone check and
+           README edit only)
+prompts:   prompts/m2_session_prompts.md item 7 (commit the setup; check it on a fresh clone)
+review:    Abraham wrote AGENTS.md, CLAUDE.md, the permission rules and both subagent files by
+           hand; the agent did not edit them. The agent changed only README.md, replacing the
+           M1 test command with the coverage-gated one so the README and AGENTS.md give the
+           same command. The tests/acceptance/ deny rule is left out on purpose until the
+           lock in Deliverable 3d.
+checks:    fresh clone in a scratch folder: python3 -m venv .venv; pip install -r
+           requirements.txt → OK; python -m pytest --cov=jobsboard --cov-branch
+           --cov-report=term-missing --cov-fail-under=80 → 4 passed, 3 skipped, total 92.86%;
+           mutmut --version → 3.8.1; uvicorn jobsboard.api:app --app-dir src → GET /docs 200
+evidence:  Milestone 2 Deliverable 2a–2c
+risk:      The permission rules have not been confirmed with /permissions after a restart,
+           and JOBSBOARD_DEMO=1 and mutmut run cannot be checked until S-3 code and
+           pyproject.toml exist. Bash commands such as sed or a redirect could still write
+           into tests/acceptance/ after the lock, because the Edit deny rule covers only the
+           Edit tool.

@@ -14,3 +14,7 @@ through the agent's multiple-choice questions are listed after each request.
 5. "Review CS690_Milestone2_Handout. Lets complete delieverables 1-9 for story S-3. Prompt me for any decision, validation, or question. adhere to guidelines in Milestone2 handout. ensure updates to md files as we go thru delieverables"
    - 1a: M1 feedback not received yet. New ACs AC-21..AC-23 approved. Synonym requirements count as one. Seeded in-memory ranking store.
    - Gap check 2: validate on set; any non-int fit_score rejected; non-str skill raises InvalidSkill, ids unchecked.
+6. "Review Milestone-2 Repo and CS690_Milestone2_Handout. I want to complete Story S3. How long would that take with Claude help ?"
+7. "I would like to complete story 3 following instructions from CS690 Milestone 2 in the Milestone 2 repo. Prompt me for any questions or validation."
+   - Deliverable 2 setup: commit as drafted (AGENTS.md, CLAUDE.md, .claude/ written by Abraham). Fresh-clone check in a scratch folder: approved.
+   - Checkpoints: stop at each review the handout requires. Team roles: Abraham led all four areas.

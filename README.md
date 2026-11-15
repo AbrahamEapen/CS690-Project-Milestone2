@@ -1,15 +1,16 @@
-# Internal Jobs Board Portal — CS 690 Project, Milestone 1
+# Internal Jobs Board Portal — CS 690 Project, Milestone 2
 
 An internal jobs board for mid-size companies. HR recruiters post roles, employees apply, and recruiters move each applicant through a status pipeline (Applied → Screened → Interview → Offer, or Rejected). Recruiters will later see applicants ranked by fit against the job description.
 
 Team: Ketan Verma, Aditya Pothuri, Abraham Eapen.
 
-**Milestone 1 builds one story, S-1 (status pipeline).** Story S-3 (ranked applicants) is designed and tested, but its tests are skipped because it is not built yet.
+Milestone 1 built S-1 (status pipeline). **Milestone 2 builds S-3 (ranked applicants with a minimum flag)**; see `MILESTONE2.md`. Agent instructions are in `AGENTS.md` (Claude Code reads it through `CLAUDE.md`).
 
 ## Requirements
 
 - Python 3.11 or later (developed on 3.12)
-- Dependencies pinned in `requirements.txt` (FastAPI, httpx, pytest, uvicorn)
+- Dependencies pinned in `requirements.txt` (FastAPI, httpx, pytest, uvicorn, pytest-cov, Hypothesis, mutmut)
+- Mutation testing (mutmut) runs on Linux and macOS; on Windows use WSL
 
 ## Install
 
@@ -19,13 +20,13 @@ source .venv/bin/activate          # Windows PowerShell: .venv\Scripts\Activate.
 python -m pip install -r requirements.txt
 ```
 
-## Run all the tests (one command)
+## Run all the tests (one command, with the coverage gate)
 
 ```bash
-python -m pytest -q
+python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing --cov-fail-under=80
 ```
 
-Expected at the Milestone 1 commit: all S-1 tests pass, and the S-3 tests are reported as skipped, each with a reason that names its AC ID.
+The command fails if line coverage of `src/jobsboard` drops below 80 percent. `python -m pytest -q` runs the same tests without coverage.
 
 ## Run the API locally (optional)
 
