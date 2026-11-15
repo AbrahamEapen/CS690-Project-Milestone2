@@ -24,3 +24,5 @@ through the agent's multiple-choice questions are listed after each request.
    - Validation: own task (Task 7), test-writer drafts unit tests first. Reviewer: after Task 5. Demo seed: store._put, recorded in D13. D10 two-pass wording: approved.
 10. Task reviews: "Task N is committed, please review and prompt for any question or validation. Then move to next step" (tasks 1-5)
    - Task 5 review: a bare str for skills raises InvalidSkill(the str) (D10 amended before Task 7).
+11. "Task 7 plan is generated. please review and prompt with questions or decisions" (test-writer's Task 7 tests, uncommitted)
+   - Q1-Q3 settled in D10/D11 as proposed; Q4 (bytes) no new rule; test-writer strengthens the two store tests that have no assert.

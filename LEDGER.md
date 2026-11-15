@@ -822,3 +822,22 @@ evidence:  S-3; AC-23; R7, D8, D11
 risk:      Green is reached with validation not yet built: until Task 7, /ranked can return
            an out-of-range fit_score set through Python (entry 41). evidence/green.txt is not
            saved yet.
+
+## Entry 43
+artifact:  docs/design/S-3.md D10 ("" is a single str) and D11 (set_profile check order; a
+           failed set leaves the store unchanged)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session reviewing
+           task work; it typed the wording Abraham chose)
+prompts:   prompts/m2_session_prompts.md item 11 (review the Task 7 tests)
+review:    test-writer's Task 7 report (evidence/delegation/test-writer-task7.md) listed four
+           points the doc did not decide. Abraham settled three in the doc before any
+           validation code: Q1, set_profile checks fit_score before skills, as D10 orders per
+           candidate; Q2, a set that raises keeps the earlier value; Q3, skills "" is a single
+           str and raises InvalidSkill(""). For Q4 (bytes passed as the whole skills argument),
+           Abraham chose no new rule, because the existing D10 rules already raise InvalidSkill
+           (with an int).
+checks:    git diff docs/design/S-3.md → D10 and D11 only; python -m pytest -q tests/acceptance
+           tests/test_s1_pipeline.py → 10 passed
+evidence:  S-3 D10, D11, §5
+risk:      Q4 is untested: set_profile(id, b"Java", 50) raises InvalidSkill with an int element
+           rather than the bytes, which a caller may find confusing.
