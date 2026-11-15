@@ -1,54 +1,59 @@
-# Contribution Statement: Project Milestone 1
+# Contribution Statement: Project Milestone 2
 
 **Name:** Abraham Eapen, QA & DevOps Lead
 **Team:** Internal Jobs Board Portal (Ketan Verma, Aditya Pothuri, Abraham Eapen)
 
 ## 1. Personal authorship
 
-- I ran two of the team's five interviews, **INT-04** (hiring manager, [senior manager, technology governance]) and **INT-05** (internal applicant, product manager). Both were in person in the week of 2026-11-02. For both, I wrote the interview questions (Guide A and Guide B in `docs/interviews/questions.md`, revised from our proposal's Appendix C) and the handwritten raw notes of the interviewees' answers. These notes are the source for `docs/interviews/INT-04.md` and `docs/interviews/INT-05.md`.
-- I made every project decision the AI tool asked me for:
-  - the INT-01 to INT-05 numbering;
-  - the "No items" proposal follow-up;
-  - the Python + FastAPI + pytest stack;
-  - building S-1 (status pipeline) and designing S-3 (ranking);
-  - the gap-check method and approving each build task;
-  - the scope changes (S-14 below the cut line, S-12 kept below it, moves out of Offer made a non-goal);
-  - the public-repository redactions;
-  - the participation details.
+- **Agent configuration.** I wrote `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.claude/agents/test-writer.md` and `.claude/agents/reviewer.md` by hand. The agent did not edit them (commit `0bf7f63`, LEDGER entry 28).
+- **Test lock.** I decided when to lock the tests and approved the deny rule `Edit(./tests/acceptance/**)`, which the agent added (`9fe0b20`, entry 31); I pushed the `m2-tests-locked` tag.
+- **Expected values.** I recomputed all six acceptance-test expected values by hand (LEDGER entry 29).
+- **Reflection.** I wrote the content of the reflection in `MILESTONE2.md`; the agent polished the wording (`e880e3a`).
+- **Decisions.** I made each of the following decisions; the agent typed them into the docs:
+  - open questions OQ-1 to OQ-4 (`a0710e9`, entry 26);
+  - the answers to the gap check (`e44da99`, entry 27);
+  - D10 two-pass skill validation and D13 `_put` (`3d6a2e9`, entry 33);
+  - skills as bare strings (`622086e`, entry 40);
+  - test-writer's questions Q1 to Q3 (`30ec446`, entry 43);
+  - the demo-empty case (`bafab82`, entry 46);
+  - when to tag `m2-green` (entry 48);
+  - the coverage and mutation-testing scope (entry 50);
+  - the triage of surviving mutants (entry 52).
 
 ## 2. AI-assisted authorship
 
-All of the following were produced with Claude Code (Claude Opus 5.5, `claude-opus-5-5`) on 2026-11-09. I reviewed each item and approved it before it was committed.
+I produced all of the following with Claude Code (Claude Opus 5.5, `claude-opus-5-5`). I reviewed each item and approved it before it was committed.
 
 | Artifact | LEDGER entries |
 | --- | --- |
-| Transcription of the team's five sets of interview notes into P-numbered files; compliments and predictions list; lesson paragraph | 1 |
-| Evidence log (24 E, 7 A, 9 Q) | 2 |
-| Backlog (stories, INVEST, acceptance criteria, ranking and cut line; now S-1 to S-14 and AC-1 to AC-20) | 3, 17 |
-| Design docs `S-1.md` and `S-3.md`, later trimmed to two pages | 4, 17 |
-| Gap checks of both design docs (run in a separate subagent) and their adjudication | 5, 6, 17 |
-| `README.md`, `AGENTS.md`, `requirements.txt`, `pytest.ini` | 7 |
-| Acceptance tests written before the code (AC-1 to AC-4 passing; AC-6 to AC-8 skipped) | 8 |
-| Build plan `docs/plans/S-1-plan.md` and the bounded-task prompts | 9 |
-| S-1 code in four bounded tasks (`src/jobsboard/pipeline.py`, `api.py`) | 10, 11, 12, 13 |
-| Traceability matrix, report builder, report PDF, this statement's drafts | 14, 15 |
-| Ledger SHA roll-ups and fixes | 16, 19 |
-| Fixes from the audit against the handout and proposal: Q-4 narrowed, S-14, scope changes in `docs/proposal_followup.md` | 17 |
-| Participation table and interview headers, filled from my answers | 18, 21 |
-| Public-repository redactions and the git-history rewrite to my GitHub no-reply email | 20 |
+| Milestone 2 repo setup, design-doc decisions, second gap check | 25–27 |
+| Fresh-clone check and README test command | 28 |
+| Test audit and AC-21 to AC-23 tests (test-writer subagent) | 29 |
+| AC-8 test fix (my choice of fix; the agent typed it) | 30 |
+| Red run, test lock and permission-denied proof | 31, 32 |
+| Build plan and its corrections | 34 |
+| Tasks 1–6 (`9223160`, `d569d92`, `8464a89`, `4ac171e`, `d3b2641`, `969ad37`) | 35–39, 42 |
+| Review delegated to the reviewer subagent | 41 |
+| Validation tests (test-writer subagent) and Task 7b | 44, 45 |
+| Task 8 demo; green run and `m2-green` tag | 47, 48 |
+| Refactor (`e6270d0`) | 49 |
+| Tests 5a–5c (test-writer subagent); coverage and mutation runs; mutant-killing test | 51–54 |
+| Headless review script and run | 55 |
+| Screenshots | 56 |
 
 ## 3. Review
 
 - **AI tool's work.**
-  - **Build plan.** Before each of the four bounded tasks, I read the agent's plan and approved it. I approved striking three steps from the build plan that were not asked for: a `GET /applications/{id}` endpoint, a `moved_at` timestamp, and an `Offer → Rejected` move that depends on open question Q-3.
-  - **Edge cases.** In the edge-case checks I reviewed after Task 1, unknown application IDs and same-stage moves returned HTTP 500 instead of the 404 and 409 the design doc specifies. Both were fixed in Tasks 2 and 4 (LEDGER entries 11 and 13).
-  - **Audit.** I asked the agent to audit the repository against the handout and the proposal. It found that the design docs exceeded two pages, that AC-16 quietly settled part of Q-4, and that two proposal scope items were changed without being recorded. I made the decisions that resolved each one (LEDGER entry 17).
-  - **Sensitive data.** I asked about data sensitivity before publishing, and approved generalizing identifying details and rewriting the commit history (LEDGER entry 20).
-- **Evidence log.** I compared the 15 E entries that come from my own interviews against my INT-04 and INT-05 notes: E-1 to E-4, E-8 to E-10, E-13, E-14, E-16 to E-20, and E-24. I have not personally checked the 9 E entries that come from INT-01 to INT-03 (E-5 to E-7, E-11, E-12, E-15, E-21 to E-23); they need a check by Aditya or Ketan against their own notes.
-- **Teammates' work.** I reviewed Aditya Pothuri's INT-01 and INT-02 notes and Ketan Verma's INT-03 notes. I found minor gaps:
-  - INT-02 has no closing "who else should we talk to?" answer.
-  - INT-01 and INT-02 used a role-specific question set rather than our shared Guide A.
+  - **AC-8 test.** The test's stage check could never fail. I chose the fix, and it was made before the tests were locked (`e06026b`).
+  - **Build plan.** I corrected the plan in two places: validation moved into its own task, and the reviewer step moved to Task 5 (`e7357bb`). I also rejected the plan's claim that `_put` was already a team decision.
+  - **test-writer's counts.** test-writer counted 37 "DID NOT RAISE" failures where the run showed 39 (LEDGER entry 44).
+  - **Reviewer findings.** Of the reviewer's four findings, I rejected three as work already planned for later tasks and accepted one (LEDGER entry 41).
+  - **Headless review.** The headless review reported no findings, so I checked `subagent_stats` rather than accept an empty report (LEDGER entry 55).
+  - **Reflection.** I accepted the four factual corrections flagged in the review of my reflection draft.
+- **Teammates' work.** I did not review any of Ketan Verma's or Aditya Pothuri's work in Milestone 2.
 
 I confirm that this statement is accurate, and that I can explain any part of the submission I am credited with.
 
-**Signature:** /s/ Abraham Eapen  **Date:** 2026-11-09
+*Wording polished with Claude Code (Claude Opus 5.5); content written by me.*
+
+**Signature:** /s/ Abraham Eapen  **Date:** 2026-11-15
