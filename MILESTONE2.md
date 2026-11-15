@@ -127,7 +127,7 @@ mutmut 3.8.1 mutates `ranking.py` and `ranking_store.py` (`[tool.mutmut]` in `py
 | `jobsboard.ranking.xǁDuplicateApplicationǁ__init____mutmut_1` | exception message → `None` | Not killed: same reason (D9) |
 | `jobsboard.ranking.xǁInvalidSkillǁ__init____mutmut_1` | exception message → `None` | Not killed: same reason (D9) |
 
-_TODO (team, one sentence): what the mutation score told you that coverage did not._
+Coverage was 100% on both story files, yet 5 of 158 mutants survived the first run, so mutation testing showed what coverage could not: tests can execute a line, like `seed_demo` setting `applicant_id`, without checking the value it produces.
 
 ## 6c. Answers to the headless review
 
