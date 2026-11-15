@@ -74,5 +74,6 @@ def rank_applicants(required_skills: frozenset[str], candidates: list[Candidate]
                 missing_required=missing,
             )
         )
-    # R4 (part): fit_score descending. Grouping (R3) and tie-break (D2) come in later tasks.
-    return sorted(entries, key=lambda e: -e.fit_score)
+    # R3: qualified entries first; R4 (part): fit_score descending within each group.
+    # Tie-break (D2) comes in Task 3.
+    return sorted(entries, key=lambda e: (not e.meets_minimum, -e.fit_score))
