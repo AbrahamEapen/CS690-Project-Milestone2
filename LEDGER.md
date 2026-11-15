@@ -1050,3 +1050,19 @@ evidence:  S-3 D9, D13; S-1 §4, §5; Deliverable 5d, 5e
 risk:      Mutation covers only ranking.py and ranking_store.py; the /ranked route in api.py is
            measured only by coverage. Two integration tests run api.py in a subprocess, and
            which source that subprocess loads under mutmut was not checked.
+
+## Entry 53
+artifact:  tests/integration/test_ranked_endpoint.py::test_d13_seed_demo_applicant_ids_are_non_empty_strings;
+           evidence/delegation/test-writer-mutant.md; commit "5e: test-writer kills seed_demo mutant 9"
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent test-writer
+prompts:   prompts/s3_mutant_kill_prompt.md
+review:    Abraham reviewed the test with a second session. The expected value comes from
+           S-1 §5 (applicant_id is a non-empty str) and §4 (an Application's JSON fields are all
+           strings), not from the code. The test does not pin the demo text "applicant-a",
+           because no doc fixes it. The count of 13 applications was checked by hand against
+           the plan table (2+3+1+2+2+3+0).
+checks:    README gated command → 154 passed, 97.54%; mutmut run
+           "jobsboard.ranking_store.x_seed_demo__mutmut_9" → killed
+evidence:  S-3 D13; S-1 §4, §5; Deliverable 5e
+risk:      The test checks only that applicant_id is a non-blank str; a seed that gave every
+           demo application the same applicant_id would still pass.

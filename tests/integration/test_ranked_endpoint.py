@@ -226,6 +226,20 @@ def test_d13_seed_demo_leaves_stages_unchanged_after_ranking():
     assert after == before
 
 
+def test_d13_seed_demo_applicant_ids_are_non_empty_strings():
+    # D13 seed must hold valid S-1 Applications. S-1 §5: applicant_id is a str, non-empty;
+    # S-1 §4: an Application's JSON fields (application_id, posting_id, applicant_id, stage)
+    # are all strings. Neither section fixes the demo applicant_id text, so the strongest
+    # requirement-backed check is: a str whose stripped value is not "".
+    store, rs = ApplicationStore(), RankingStore()
+    seed_demo(store, rs)
+    apps = [a for p in DEMO_EXPECTED for a in store.list_for_posting(p)]
+    assert len(apps) == 13  # plan table: 2 + 3 + 1 + 2 + 2 + 3 + 0 applications
+    for a in apps:
+        assert isinstance(a.applicant_id, str), a.application_id
+        assert a.applicant_id.strip() != "", a.application_id
+
+
 _DEMO_SCRIPT = """
 import json
 from fastapi.testclient import TestClient
