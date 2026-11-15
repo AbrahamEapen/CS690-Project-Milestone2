@@ -15,9 +15,12 @@ from jobsboard.pipeline import (
     Stage,
     move_stage,
 )
+from jobsboard.ranking import rank_applicants
+from jobsboard.ranking_store import PostingNotFound, RankingStore
 
 app = FastAPI(title="Internal Jobs Board")
 store = ApplicationStore()  # module-level, in-memory (S-1.md D3)
+ranking_store = RankingStore()  # module-level, in-memory (S-3.md D5, D12)
 
 
 class CreateApplicationBody(BaseModel):
@@ -57,6 +60,12 @@ def _invalid_transition(_: Request, exc: InvalidTransition) -> JSONResponse:
     )
 
 
+@app.exception_handler(PostingNotFound)
+def _posting_not_found(_: Request, exc: PostingNotFound) -> JSONResponse:
+    # S-3.md section 4 and D12: 404 exactly when no requirements are set for the posting.
+    return JSONResponse(status_code=404, content={"detail": {"error": "posting_not_found"}})
+
+
 def _to_json(a: Application) -> dict:
     d = asdict(a)
     d["stage"] = a.stage.value
@@ -79,3 +88,10 @@ def pipeline(posting_id: str) -> dict:
     for a in store.list_for_posting(posting_id):
         stages[a.stage.value].append(a.application_id)
     return {"posting_id": posting_id, "stages": stages}
+
+
+@app.get("/postings/{posting_id}/ranked")
+def ranked(posting_id: str) -> list[dict]:
+    # S-3.md section 4, D12: reads the ranking store and S-1 data only, so no stage changes (R6).
+    required, candidates = ranking_store.candidates_for_posting(posting_id, store.list_for_posting(posting_id))
+    return [asdict(e) for e in rank_applicants(required, candidates)]
