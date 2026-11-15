@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from jobsboard.pipeline import Application
+from jobsboard.pipeline import Application, Stage
 from jobsboard.ranking import Candidate
 
 
@@ -36,11 +36,13 @@ class RankingStore:
         # D12: unknown posting means no requirements set for it.
         if posting_id not in self._requirements:
             raise PostingNotFound(posting_id)
-        # D8, D11: keep applications for this posting that have a profile, in the order given.
-        # The Rejected filter comes in Task 6.
+        # R7, D8, D11: keep applications for this posting that have a profile and are not
+        # at stage Rejected, in the order given.
         candidates = [
             self._profiles[a.application_id]
             for a in applications
-            if a.posting_id == posting_id and a.application_id in self._profiles
+            if a.posting_id == posting_id
+            and a.application_id in self._profiles
+            and a.stage is not Stage.REJECTED
         ]
         return self._requirements[posting_id], candidates
