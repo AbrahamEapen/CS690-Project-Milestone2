@@ -1,6 +1,7 @@
 """S-1 HTTP API (docs/design/S-1.md §4)."""
 from __future__ import annotations
 
+import os
 from dataclasses import asdict
 
 from fastapi import FastAPI, Request
@@ -16,11 +17,13 @@ from jobsboard.pipeline import (
     move_stage,
 )
 from jobsboard.ranking import rank_applicants
-from jobsboard.ranking_store import PostingNotFound, RankingStore
+from jobsboard.ranking_store import PostingNotFound, RankingStore, seed_demo
 
 app = FastAPI(title="Internal Jobs Board")
 store = ApplicationStore()  # module-level, in-memory (S-1.md D3)
 ranking_store = RankingStore()  # module-level, in-memory (S-3.md D5, D12)
+if os.environ.get("JOBSBOARD_DEMO") == "1":  # S-3.md D13: exactly "1"; runs once, at import
+    seed_demo(store, ranking_store)
 
 
 class CreateApplicationBody(BaseModel):

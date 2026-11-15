@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
-from jobsboard.pipeline import Application, Stage
+from jobsboard.pipeline import Application, ApplicationStore, Stage, move_stage
 from jobsboard.ranking import Candidate, _validate_fit_score, _validate_skills
 
 
@@ -51,3 +51,38 @@ class RankingStore:
             and a.stage is not Stage.REJECTED
         ]
         return self._requirements[posting_id], candidates
+
+
+# D13 demo data: one posting per S-3 AC plus demo-empty (rows in docs/plans/S-3-plan.md).
+# Each posting: (posting_id, required skills, [(application letter, skills or None, fit_score)]).
+# Skills None means the application gets no profile (no fit score yet).
+_DEMO_POSTINGS: tuple[tuple[str, tuple[str, ...], tuple[tuple[str, tuple[str, ...] | None, int], ...]], ...] = (
+    ("demo-ac6", ("Java", "kdb+"), (("a", ("Java", "kdb+"), 40), ("b", ("Java",), 90))),
+    ("demo-ac7", ("Java",), (("a", ("Java",), 55), ("b", ("Java",), 80), ("c", ("Java",), 70))),
+    ("demo-ac8", ("Java", "kdb+"), (("b", ("Java",), 75),)),
+    ("demo-ac21", ("PostgreSQL",), (("a", ("Postgres",), 60), ("b", ("MySQL",), 90))),
+    ("demo-ac22", ("Java",), (("b", ("Java",), 70), ("a", ("Java",), 70))),  # b inserted first
+    ("demo-ac23", ("Java",), (("x", ("Java",), 50), ("y", ("Java",), 80), ("z", None, 0))),
+    ("demo-empty", ("Java",), ()),
+)
+
+
+def seed_demo(store: ApplicationStore, ranking_store: RankingStore) -> None:
+    """Seed the demo postings into both stores (D13); called by api.py when JOBSBOARD_DEMO=1."""
+    for posting_id, required, applications in _DEMO_POSTINGS:
+        ranking_store.set_requirements(posting_id, required)
+        for letter, skills, fit_score in applications:
+            application_id = f"{posting_id}-{letter}"
+            # D13: fixed, readable IDs through the private _put; S-1 has no public way to choose one.
+            store._put(
+                Application(
+                    application_id=application_id,
+                    posting_id=posting_id,
+                    applicant_id=f"applicant-{letter}",
+                    stage=Stage.APPLIED,
+                )
+            )
+            if skills is not None:
+                ranking_store.set_profile(application_id, skills, fit_score)
+    # AC-23: Y has a profile but is moved to Rejected, so /ranked leaves it out (D8).
+    move_stage(store, "demo-ac23-y", Stage.REJECTED)
