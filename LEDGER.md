@@ -961,3 +961,28 @@ checks:    python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missi
 evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 4d
 risk:      seed_demo (ranking_store.py lines 72-88) has no automated test, so ranking_store.py
            coverage is 67%; the demo is checked only by hand until Deliverable 5.
+
+## Entry 49
+artifact:  src/jobsboard/ranking.py; src/jobsboard/ranking_store.py; evidence/refactor.txt;
+           prompts/s3_refactor.md; commit e6270d0
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Deliverable 4e refactor
+prompts:   prompts/s3_refactor.md (refactor task, verbatim)
+review:    Abraham approved the agent's plan before any edit, then approved the diff. No
+           behavior change: _validate_fit_score and _validate_skills renamed to the public
+           validate_fit_score and validate_skills (bodies unchanged), with the three calls in
+           rank_applicants and the import and three calls in ranking_store.py updated; this
+           removes the private cross-module import noted in entries 45 and 46. Demo rows changed
+           from (letter, skills or None, fit_score) to (letter, profile), where profile is
+           (skills, fit_score) or None, so demo-ac23-z no longer carries an unused 0; two type
+           aliases replace the long annotation. The agent pointed out that docs/plans/S-3-plan.md
+           still names the private helpers; the prompt kept docs/ out of scope.
+checks:    python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 | tee evidence/refactor.txt → 100 passed, total 90.27% (was
+           90.55%: seed_demo gained one uncovered statement). The 10 demo curl responses under
+           JOBSBOARD_DEMO=1 (7 /ranked postings, the 404, 2 pipelines) were captured before
+           (committed code, via git stash) and after the change, and diff found them identical.
+evidence:  S-3; D9, D10, D11, D13; Deliverable 4e
+risk:      validate_fit_score and validate_skills are now public names that the design doc does
+           not list in §4, and the plan text still calls them private. seed_demo still has no
+           automated test, so the demo comparison was a one-off check by hand.
