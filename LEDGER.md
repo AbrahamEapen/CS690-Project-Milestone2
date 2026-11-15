@@ -802,3 +802,23 @@ checks:    report saved verbatim; git diff --stat d3b2641 HEAD -- src → empty 
 evidence:  S-3; AC-8, AC-23; R6, R7, D8, D10, D11, D12, §4; Deliverable 4c
 risk:      Until Task 7, /ranked can return an out-of-range fit_score set through Python. Until
            5b, a change to the 404 body or the empty-list response would not fail any test.
+
+## Entry 42
+artifact:  src/jobsboard/ranking_store.py; prompts/s3_task_6_AC-23.md; commit 969ad37
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 6 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_6_AC-23.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           candidates_for_posting now also requires a.stage is not Stage.REJECTED (D11
+           wording), so the ranked list holds exactly this posting's applications that have a
+           profile and are not Rejected (R7, D8), in the order given. This closes the
+           reviewer's Task 5 finding 3 (entry 41). Setters are still unvalidated (Task 7); no
+           other file changed.
+checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_only_scored_non_rejected
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 10 passed, total 90.21% (all 6 S-3 acceptance tests and all
+           4 S-1 tests)
+evidence:  S-3; AC-23; R7, D8, D11
+risk:      Green is reached with validation not yet built: until Task 7, /ranked can return
+           an out-of-range fit_score set through Python (entry 41). evidence/green.txt is not
+           saved yet.
