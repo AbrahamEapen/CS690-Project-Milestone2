@@ -527,7 +527,7 @@ risk:      The 30 resolutions were checked against the doc text, not by a second
 ## Entry 28
 artifact:  AGENTS.md, CLAUDE.md, .claude/settings.json, .claude/agents/test-writer.md,
            .claude/agents/reviewer.md, requirements.txt, README.md (test command); commit
-           <see git log: "2: agent setup">
+           0bf7f63
 tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (fresh-clone check and
            README edit only)
 prompts:   prompts/m2_session_prompts.md item 7 (commit the setup; check it on a fresh clone)
