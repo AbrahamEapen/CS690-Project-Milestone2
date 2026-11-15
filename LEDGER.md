@@ -1066,3 +1066,21 @@ checks:    README gated command → 154 passed, 97.54%; mutmut run
 evidence:  S-3 D13; S-1 §4, §5; Deliverable 5e
 risk:      The test checks only that applicant_id is a non-blank str; a seed that gave every
            demo application the same applicant_id would still pass.
+
+## Entry 54
+artifact:  evidence/mutation-after.txt; MILESTONE2.md §5 (5b, 5d, 5e, 5f); docs/design/S-3.md §9;
+           traceability/traceability.csv (S-3 rows)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session)
+prompts:   prompts/m2_session_prompts.md item 16 (review the mutant-kill test; next step)
+review:    mutation-after.txt is a fresh run (the mutants/ cache moved aside) saved raw, plus
+           "mutmut results": 158 mutants, 154 killed, 4 survived (the D9 message mutants
+           Abraham marked equivalent in entry 52). The "passing commit" column of the matrix
+           was taken from the task reviews, where each test first passed: AC-7 9223160,
+           AC-6 d569d92, AC-22 8464a89, AC-21 4ac171e, AC-8 d3b2641, AC-23 969ad37. S-3 rows
+           in the CSV now use tests/acceptance/ paths, and three rows were added for
+           AC-21..AC-23. §9 lists the same names. The 5e comparison sentence is left to the team.
+checks:    mutmut run → 158/158, 154 killed, 4 survived; every test name in the matrix found
+           by grep in tests/acceptance/test_s3_ranking.py (6/6); pytest -q tests/integration → 13 passed
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 5b, 5d, 5e, 5f
+risk:      The evidence column for AC-22 and AC-23 points at team decisions (Q-6, D8) rather
+           than interview evidence; no recruiter has confirmed either rule (entry 26).

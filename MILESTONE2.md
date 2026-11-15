@@ -96,19 +96,38 @@ The agent wrote the plan in plan mode (`prompts/s3_plan_prompt.md`). Abraham rea
 
 ### 5f. Traceability (updated rows)
 
-_TODO._
+The S-3 rows of `traceability/traceability.csv`, updated. The fifth column is the commit that first made the test pass. Design doc §9 lists the same test names.
+
+| Evidence ID | Story | AC | Test | Passing commit |
+| --- | --- | --- | --- | --- |
+| E-11; E-12; E-13; E-14 | S-3 | AC-6 | `tests/acceptance/test_s3_ranking.py::test_ac6_flagged_never_above_qualified` | d569d92 (task 2) |
+| E-11; E-12; E-13; E-14 | S-3 | AC-7 | `tests/acceptance/test_s3_ranking.py::test_ac7_qualified_ordered_by_fit_score` | 9223160 (task 1) |
+| E-11; E-12; E-13; E-14 | S-3 | AC-8 | `tests/acceptance/test_s3_ranking.py::test_ac8_flagged_applicant_kept_and_stage_unchanged` | d3b2641 (task 5) |
+| E-11; E-12; E-13; E-14; Q-9 (INT-03:P03) | S-3 | AC-21 | `tests/acceptance/test_s3_ranking.py::test_ac21_synonym_meets_minimum` | 4ac171e (task 4) |
+| E-11; E-12; E-13; E-14; Q-6 | S-3 | AC-22 | `tests/acceptance/test_s3_ranking.py::test_ac22_equal_fit_scores_ordered_by_application_id` | 8464a89 (task 3) |
+| E-11; E-12; E-13; E-14 (D8, team decision) | S-3 | AC-23 | `tests/acceptance/test_s3_ranking.py::test_ac23_ranked_endpoint_lists_only_scored_non_rejected` | 969ad37 (task 6) |
 
 ### 5b. Integration test
 
-_TODO._
+`tests/integration/test_ranked_endpoint.py` (13 tests, ledger entries 51 and 53). It joins **the S-3 data module, `RankingStore` (`api.ranking_store`)**, and **the `/ranked` route in `api.py` reading S-1's `ApplicationStore` (`api.store`)**, with no mock between them. Requests go through FastAPI's `TestClient` into the real module-level stores. The tests cover the 404, the two `200 []` cases, the R7 posting filter, the JSON shape (D12), and `seed_demo` against the plan's demo table, both in-process and with `JOBSBOARD_DEMO=1` in a fresh interpreter. This closes the Task 5 reviewer's finding 4 (ledger entry 41).
 
 ### 5d. Uncovered line or branch
 
-_TODO._
+`evidence/coverage.txt`: 154 passed, 97.54% over the story files (`ranking.py` and `ranking_store.py` 100%; `api.py` 92%, missing 26, 36, 47). Line 26 of `api.py`, `seed_demo(store, ranking_store)` under `if os.environ.get("JOBSBOARD_DEMO") == "1"`, is not covered. That is acceptable. `test_d13_demo_env_1_serves_plan_table_over_http` does run it, but in a subprocess (it has to import `api.py` with the variable set), and pytest-cov does not measure subprocesses. Turning on coverage's subprocess measurement (`COVERAGE_PROCESS_START`) would count it. Lines 36 and 47 are S-1 error paths (blank `applicant_id`, unknown application).
 
 ### 5e. Surviving mutants
 
-_TODO._
+mutmut 3.8.1 mutates `ranking.py` and `ranking_store.py` (`[tool.mutmut]` in `pyproject.toml`). First run (`evidence/mutation-before.txt`): 158 mutants, 153 killed, 5 survived. After (`evidence/mutation-after.txt`): 154 killed, 4 survived. All 5 survivors were triaged; there were fewer than 20.
+
+| Mutant | What it changed | Outcome |
+| --- | --- | --- |
+| `jobsboard.ranking_store.x_seed_demo__mutmut_9` | demo `applicant_id=f"applicant-{letter}"` → `None` | Killed by `test_d13_seed_demo_applicant_ids_are_non_empty_strings` (test-writer, from S-1 §4/§5), 3e151a1 |
+| `jobsboard.ranking_store.xǁPostingNotFoundǁ__init____mutmut_1` | exception message → `None` | Not killed: equivalent under D9 ("no message format is required"). A test would have to take its expected text from the code. |
+| `jobsboard.ranking.xǁInvalidFitScoreǁ__init____mutmut_1` | exception message → `None` | Not killed: same reason (D9) |
+| `jobsboard.ranking.xǁDuplicateApplicationǁ__init____mutmut_1` | exception message → `None` | Not killed: same reason (D9) |
+| `jobsboard.ranking.xǁInvalidSkillǁ__init____mutmut_1` | exception message → `None` | Not killed: same reason (D9) |
+
+_TODO (team, one sentence): what the mutation score told you that coverage did not._
 
 ## 6c. Answers to the headless review
 
