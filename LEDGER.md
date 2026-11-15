@@ -943,3 +943,21 @@ evidence:  S-3; AC-6, AC-7, AC-8, AC-21, AC-22, AC-23; D13, §4; Deliverables 4b
 risk:      No automated test runs the demo, so coverage fell from 96.57% to 90.55%
            (ranking_store.py lines 72-88 and api.py line 26 uncovered); the curl checks are by
            hand. seed_demo depends on the private ApplicationStore._put (D13).
+
+## Entry 48
+artifact:  evidence/green.txt; tag m2-green (4d)
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15 (second session: reviewed
+           Task 8, ran the demo, saved green.txt, tagged)
+prompts:   prompts/m2_session_prompts.md item 13 (review task 8, then green)
+review:    Task 8 (b7e7fb9) was reviewed by running JOBSBOARD_DEMO=1 uvicorn and curling every
+           demo URL: all 7 postings, the AC-8 pipeline and the 404 match the plan table and
+           their criteria; without the env var, demo-ac6 returns 404. Abraham chose on
+           2026-11-15 to tag m2-green after Tasks 7 and 8, not at the first all-pass run
+           (969ad37), so the tag marks the finished build with validation in place. green.txt
+           is the tool's own output, written with tee.
+checks:    python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 | tee evidence/green.txt → 100 passed, total 90.55%;
+           git diff --stat m2-tests-locked m2-green -- tests/acceptance → empty (lock held)
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverable 4d
+risk:      seed_demo (ranking_store.py lines 72-88) has no automated test, so ranking_store.py
+           coverage is 67%; the demo is checked only by hand until Deliverable 5.

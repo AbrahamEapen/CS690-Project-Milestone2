@@ -28,3 +28,4 @@ through the agent's multiple-choice questions are listed after each request.
    - Q1-Q3 settled in D10/D11 as proposed; Q4 (bytes) no new rule; test-writer strengthens the two store tests that have no assert.
 12. "Task 7b diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
    - Add demo-empty (200 []) to D13 and the plan for the 4f empty-state screenshot.
+13. "Task 8 diff is comitted. Review and validate changes. prompt me for any questions or decisions. Then move to next step"
