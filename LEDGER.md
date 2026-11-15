@@ -719,3 +719,26 @@ checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac22_eq
 evidence:  S-3; AC-22; D2, R4
 risk:      application_id order is plain string order (D2), so "10" sorts before "9"; S-1
            IDs are uuid hex, so this only shows with hand-made IDs.
+
+## Entry 38
+artifact:  src/jobsboard/ranking.py; prompts/s3_task_4_AC-21.md; commit 4ac171e
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 4 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_4_AC-21.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           The agent added _skill_key (the SKILL_SYNONYMS group is the key, so matching works
+           both ways, R1/D7) and _spelling_order, and rewrote _missing_required to group
+           required skills by key (D1), show the first posting spelling by (casefold(),
+           spelling) for each missing group (D1), and sort the result the same way (§5).
+           Before approving, Abraham set five expected missing_required values by hand; the
+           agent worked each out from D1/D7/§5 in its plan before running anything.
+checks:    console only, no test file: a) {"Postgres","PostgreSQL"} vs {} → ("Postgres",);
+           b) {"Java"," java"} vs {} → ("Java",); c) {"Word"} vs {"Microsoft Word "} → ();
+           d) {"PostgreSQL"} vs {"POSTGRES"} → (); e) {"kdb+","Java"} vs {} → ("Java","kdb+");
+           all five matched. python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac21_synonym_meets_minimum
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 2 failed, 8 passed, total 91.30% (failing: AC-8, AC-23, as
+           the plan expects)
+evidence:  S-3; AC-21; R1, D1, D7, §5
+risk:      The five console checks are not saved as tests; Task 7 or Deliverable 5 should add
+           them as unit tests through test-writer so a later change cannot break D1 quietly.
