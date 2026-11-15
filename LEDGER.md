@@ -841,3 +841,34 @@ checks:    git diff docs/design/S-3.md → D10 and D11 only; python -m pytest -q
 evidence:  S-3 D10, D11, §5
 risk:      Q4 is untested: set_profile(id, b"Java", 50) raises InvalidSkill with an int element
            rather than the bytes, which a caller may find confusing.
+
+## Entry 44
+artifact:  tests/unit/test_ranking_validation.py (new, 90 tests); evidence/delegation/
+           test-writer-task7.md and test-writer-task7-followup.md; prompts/
+           s3_task_7_tests_prompt.md and s3_task_7_tests_followup_prompt.md; commit 9a12c89
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, subagent test-writer
+           (two runs), started by the main agent
+prompts:   prompts/s3_task_7_tests_prompt.md and prompts/s3_task_7_tests_followup_prompt.md
+           (main-agent prompts verbatim, with the changes made before passing them to
+           test-writer)
+review:    Run 1 wrote 67 tests from §5, §7, D3, D9, D10, D11 and listed four points the doc did
+           not decide; Abraham settled Q1-Q3 in the doc (entry 43, 30ec446) and left Q4 (bytes).
+           Run 2 added Q1 (set_profile checks fit_score before skills), Q2 (a failed set keeps the
+           earlier value, and a failed first set_requirements still gives PostingNotFound), Q3
+           (skills "" raise InvalidSkill("")), and made the 0/100 and overwrite tests check the
+           stored profile through candidates_for_posting (overwrite gives 60). The first report's
+           "37 DID NOT RAISE" is an arithmetic slip: the run shows 39 (25 InvalidSkill + 12
+           InvalidFitScore + 2 DuplicateApplication), plus 5 AttributeError and 2 TypeError,
+           which makes 46. The main agent spot-checked repr and sorted() order, list order, and
+           duplicate-before-score against D10. Run 2 flagged two points: the store tests assume
+           skills are stored exactly as given (not stated in D11), and the Q2 set_profile test
+           accepts either InvalidFitScore or InvalidSkill on purpose.
+checks:    python -m pytest -q tests/unit/test_ranking_validation.py → 69 failed, 21 passed;
+           failure reasons recounted by the main agent: 37 DID NOT RAISE InvalidSkill, 17
+           InvalidFitScore, 6 (InvalidFitScore, InvalidSkill), 2 DuplicateApplication, 5
+           AttributeError, 2 TypeError = 69. git diff --stat -- src tests/acceptance → empty.
+           Full command: 69 failed, 31 passed, total 94.85% (all 10 acceptance tests pass).
+evidence:  S-3; §5, §7, D3, D9, D10, D11 (as amended in 622086e and 30ec446); Task 7
+risk:      The suite is red until Task 7b builds validation. That skills are stored as given is
+           assumed by the tests but not written in D11. Q4 (bytes as the whole skills argument)
+           stays untested.
