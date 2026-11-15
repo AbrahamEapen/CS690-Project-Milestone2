@@ -701,3 +701,21 @@ checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac6_fla
 evidence:  S-3; AC-6; R3, R4 (fit_score part)
 risk:      Ties within a group still keep input order (stable sort) until Task 3 adds the
            application_id tie-break (D2).
+
+## Entry 37
+artifact:  src/jobsboard/ranking.py; prompts/s3_task_3_AC-22.md; commit 8464a89
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 3 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_3_AC-22.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           One line changed: application_id was added as the last sort key, giving
+           (not meets_minimum, -fit_score, application_id), so equal fit scores within a group
+           are in ascending application_id order (D2, R4) and input order no longer matters.
+           No other file changed.
+checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac22_equal_fit_scores_ordered_by_application_id
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 3 failed, 7 passed, total 90.28% (failing: AC-8, AC-21,
+           AC-23, as the plan expects)
+evidence:  S-3; AC-22; D2, R4
+risk:      application_id order is plain string order (D2), so "10" sorts before "9"; S-1
+           IDs are uuid hex, so this only shows with hand-made IDs.
