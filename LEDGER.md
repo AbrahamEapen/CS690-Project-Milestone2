@@ -742,3 +742,27 @@ checks:    console only, no test file: a) {"Postgres","PostgreSQL"} vs {} → ("
 evidence:  S-3; AC-21; R1, D1, D7, §5
 risk:      The five console checks are not saved as tests; Task 7 or Deliverable 5 should add
            them as unit tests through test-writer so a later change cannot break D1 quietly.
+
+## Entry 39
+artifact:  src/jobsboard/ranking_store.py (new); src/jobsboard/api.py;
+           prompts/s3_task_5_AC-8.md; commit d3b2641
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 5 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_5_AC-8.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           ranking_store.py: PostingNotFound(ValueError); RankingStore whose setters store
+           and overwrite without validating (validation is Task 7, as the prompt says);
+           candidates_for_posting raises PostingNotFound when no requirements are set, else
+           keeps this posting's applications that have a profile, in the order given (no
+           Rejected filter until Task 6). api.py: module-level ranking_store (D12), a 404
+           handler with body {"detail": {"error": "posting_not_found"}} (§4), and
+           GET /postings/{posting_id}/ranked, which only reads S-1 data (R6). S-1 code unchanged.
+checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac8_flagged_applicant_kept_and_stage_unchanged
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 1 failed, 9 passed, total 90.21% (failing: AC-23, which still
+           lists the Rejected applicant Y, as the plan expects). Console only: GET
+           /postings/no-such-posting/ranked → 404 {"detail": {"error": "posting_not_found"}}.
+evidence:  S-3; AC-8; R6, D5, D11, D12, §4
+risk:      The 404 path (api.py line 66, ranking_store.py lines 12-13 and 38) has no saved test;
+           Deliverable 5 should add one. Until Task 7 the store accepts any value, so bad data
+           set through Python is only caught when it breaks ranking.
