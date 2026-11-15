@@ -662,3 +662,22 @@ checks:    grep -n "~~" docs/plans/S-3-plan.md → 3 crossed-out passages; each 
 evidence:  S-3; AC-6..AC-8, AC-21..AC-23; D10, D13; Deliverable 4a
 risk:      Tasks 7 and 8 are not tied to an AC. The handout asks for every task to be tied to
            one, so a grader may count them as unplanned work. They rest on §5/D10 and D13 instead.
+
+## Entry 35
+artifact:  src/jobsboard/ranking.py (new); prompts/s3_task_1_AC-7.md; commit 9223160
+tool:      Claude Code, Claude Opus 5.5 (claude-opus-5-5), 2026-11-15, main agent (no
+           subagent), Task 1 of docs/plans/S-3-plan.md
+prompts:   prompts/s3_task_1_AC-7.md (bounded task, verbatim)
+review:    Abraham approved the agent's task plan before any edit, then approved the diff.
+           The agent kept to the corrected Task 1 scope: named settings, Candidate,
+           RankedEntry, the three ValueError exceptions (defined but not raised until Task 7),
+           and rank_applicants with exact strip/casefold matching, R1/R2 flag, §5
+           missing_required order, and a sort by fit_score descending only. No validation,
+           synonyms, grouping or tie-break; no other file changed.
+checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac7_qualified_ordered_by_fit_score
+           → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
+           --cov-fail-under=80 → 5 failed, 5 passed, total 90.28% (failing: AC-6, AC-8,
+           AC-21, AC-22, AC-23, as the plan expects)
+evidence:  S-3; AC-7; R1, R2, R4 (fit_score part); §5; D9
+risk:      Ties keep input order (Python's stable sort) until Task 3, and the exception
+           constructors are uncovered (ranking.py lines 34-36, 41-42, 47-48) until Task 7.
