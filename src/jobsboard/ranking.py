@@ -49,14 +49,14 @@ class InvalidSkill(ValueError):
         self.skill = skill
 
 
-def _validate_fit_score(application_id: str, fit_score: object) -> None:
+def validate_fit_score(application_id: str, fit_score: object) -> None:
     # Section 5, D3: a plain int from FIT_SCORE_MIN to FIT_SCORE_MAX inclusive; bool, float,
     # str and None are rejected, and out-of-range scores are rejected, not clamped.
     if type(fit_score) is not int or not FIT_SCORE_MIN <= fit_score <= FIT_SCORE_MAX:
         raise InvalidFitScore(application_id, fit_score)
 
 
-def _validate_skills(skills: object) -> list[str]:
+def validate_skills(skills: object) -> list[str]:
     # D10: skills given as a single str (including "") are rejected with that str.
     if isinstance(skills, str):
         raise InvalidSkill(skills)
@@ -107,15 +107,15 @@ def _missing_required(required_skills: Iterable[str], skills: Iterable[str]) -> 
 def rank_applicants(required_skills: frozenset[str], candidates: list[Candidate]) -> list[RankedEntry]:
     # D3, D10: validate all input before ranking, raising the first problem in this order:
     # required skills, then each candidate in list order (duplicate ID, fit score, skills).
-    required = _validate_skills(required_skills)
+    required = validate_skills(required_skills)
     checked: list[tuple[Candidate, list[str]]] = []
     seen: set[str] = set()
     for c in list(candidates):
         if c.application_id in seen:  # D3: exact string match
             raise DuplicateApplication(c.application_id)
         seen.add(c.application_id)
-        _validate_fit_score(c.application_id, c.fit_score)
-        checked.append((c, _validate_skills(c.skills)))
+        validate_fit_score(c.application_id, c.fit_score)
+        checked.append((c, validate_skills(c.skills)))
 
     entries = []
     for c, skills in checked:
