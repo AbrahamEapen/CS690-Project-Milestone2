@@ -673,7 +673,9 @@ review:    Abraham approved the agent's task plan before any edit, then approved
            RankedEntry, the three ValueError exceptions (defined but not raised until Task 7),
            and rank_applicants with exact strip/casefold matching, R1/R2 flag, §5
            missing_required order, and a sort by fit_score descending only. No validation,
-           synonyms, grouping or tie-break; no other file changed.
+           synonyms, grouping or tie-break; no other file changed. D1 is also left to Task 4:
+           required skills that are equal after normalizing (e.g. "Java" and " java") are not
+           yet merged into one requirement, so both spellings can appear in missing_required.
 checks:    python -m pytest -q tests/acceptance/test_s3_ranking.py::test_ac7_qualified_ordered_by_fit_score
            → 1 passed; python -m pytest --cov=jobsboard --cov-branch --cov-report=term-missing
            --cov-fail-under=80 → 5 failed, 5 passed, total 90.28% (failing: AC-6, AC-8,
