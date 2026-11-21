@@ -1219,7 +1219,7 @@ review:    Ketan asked whether the tests follow the Milestone 1 design doc befor
            risk). Fault check: with the blank check in api.py disabled, both cases fail.
 checks:    full test command → 156 passed; coverage gate 97.54% → 98.52%; api.py line 36 now
            covered (missing 26, 47)
-evidence:  S-1 §4, §5 R4; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
+evidence:  S-1 §4, §5, §6 R4; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
 risk:      The 422 body is still unpinned by design (D2); a FastAPI upgrade could change it unseen.
 
 ## Entry 62
@@ -1229,13 +1229,13 @@ tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; req
            main agent, not test-writer (see entry 61)
 prompts:   same as entry 61; prompts/m2_repo_review_prompt.md (test coverage follow-up)
 review:    Expected values from S-1.md §4: POST /applications/{id}/stage on an unknown id returns
-           404 {"detail": {"error": "application_not_found", "application_id": <id>}}; §6 lists
+           404 {"detail": {"error": "application_not_found", "application_id": <id>}}; §7 lists
            an unknown application_id as an edge case; R4: the pipeline is unchanged. The full 404
            body is compared. Fault check: with the body's application_id changed in api.py, the
            test fails.
 checks:    full test command → 157 passed; coverage gate 98.52% → 99.01%; api.py line 47 covered
            (missing 26 only); pipeline.py, outside the gate, 93% → 100% (lines 31-32, 75-76)
-evidence:  S-1 §4, §5 R4, §6; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
+evidence:  S-1 §4, §6 R4, §7; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
 risk:      api.py line 26 (demo seed under JOBSBOARD_DEMO=1) is still only run in a subprocess
            that pytest-cov does not measure.
 
@@ -1245,13 +1245,13 @@ artifact:  tests/integration/test_s1_error_paths.py:
 tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma;
            main agent, not test-writer (see entry 61)
 prompts:   same as entry 61; prompts/m2_repo_review_prompt.md (test coverage follow-up)
-review:    Expected value from S-1.md D2, "validation ... runs before the lookup (404)", and §6,
+review:    Expected value from S-1.md D2, "validation ... runs before the lookup (404)", and §7,
            a wrong-case stage name ("screened") is 422. So an unknown id with a bad body must be
            422, not 404. This test adds no coverage; it pins an ordering rule the doc states and
            no earlier test checked.
 checks:    full test command → 158 passed; coverage gate 99.01% (unchanged); whole package
            (--cov=jobsboard) 96% → 99%
-evidence:  S-1 D2, §6; docs/reviews/2026-11-20-repo-review.md C5
+evidence:  S-1 §8 D2, §7; docs/reviews/2026-11-20-repo-review.md C5
 risk:      MILESTONE2.md §5d and evidence/coverage.txt still show the 2026-11-15 numbers (154
            passed, 97.54%); they are the team's record of the milestone run and were not edited.
 
@@ -1272,3 +1272,22 @@ checks:    mutmut run → 158/158, killed 154, survived 4, timeout 0, suspicious
 evidence:  S-3; MILESTONE2.md §5e; entry 58 risk (now closed)
 risk:      Run on Linux, not on the team's machines; mutmut scope is still ranking.py and
            ranking_store.py only (team decision, entry 50), so api.py and pipeline.py are not mutated.
+
+## Entry 65
+artifact:  tests/integration/test_s1_error_paths.py (comments only); LEDGER.md entries 61-63
+           (section references)
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   found while doing item 2; prompts/m2_repo_review_prompt.md (further test and review work)
+review:    Claude's own error, caught when re-reading S-1.md for item 2: entries 61-63 and the test
+           comments cited R4 as §5 and the edge cases as §6. In S-1.md, R4 is in §6 (Rules), edge
+           cases are §7, and D2 is §8; §4 (Interface) and §5 (Data) were cited correctly. The
+           references are corrected in place; the pushed commit messages 7f3bde3, 6c1fe03 and
+           2c73fc9 still carry the old numbers and cannot be changed without rewriting history.
+           No assertion or expected value changed: each one was taken from the right text, only
+           its section number was wrong.
+checks:    python -m pytest -q tests/integration/test_s1_error_paths.py → 4 passed; grep of each
+           corrected reference against S-1.md headings (§4 Interface, §5 Data, §6 Rules,
+           §7 Edge cases, §8 Decisions)
+evidence:  S-1 §4-§8; entries 61-63
+risk:      Commit messages 7f3bde3 (§4, R4), 6c1fe03 (§4, §6, R4) and 2c73fc9 (D2) keep the
+           wrong §6 for edge cases; this entry is the correction of record.

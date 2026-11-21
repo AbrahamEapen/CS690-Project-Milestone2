@@ -1,4 +1,4 @@
-"""Integration tests for the S-1 HTTP error paths (docs/design/S-1.md §4, §5 R4, §6, D2).
+"""Integration tests for the S-1 HTTP error paths (docs/design/S-1.md §4, §5, §6 R4, §7, §8 D2).
 
 No mocks: the real api.app and its module-level api.store. Each test uses a unique posting ID
 (S-1.md D3). Expected status codes and bodies come from S-1.md §4; the 422 body is FastAPI's
@@ -30,7 +30,7 @@ def _stages(posting_id: str) -> dict:
     return resp.json()["stages"]
 
 
-# S-1.md §4: 422 if applicant_id is blank; §5: applicant_id is non-empty; R4: a 422 leaves the
+# S-1.md §4: 422 if applicant_id is blank; §5: applicant_id is non-empty; §6 R4: a 422 leaves the
 # pipeline unchanged, so no application is added.
 @pytest.mark.parametrize("blank", ["", "   "])
 def test_s1_s4_blank_applicant_id_returns_422_and_adds_nothing(blank: str):
@@ -45,8 +45,8 @@ def test_s1_s4_blank_applicant_id_returns_422_and_adds_nothing(blank: str):
     assert _stages(pid) == before
 
 
-# S-1.md §4: an unknown application_id returns 404 with this exact body; §6 lists it as an edge
-# case; R4: a 404 leaves the pipeline unchanged.
+# S-1.md §4: an unknown application_id returns 404 with this exact body; §7 lists it as an edge
+# case; §6 R4: a 404 leaves the pipeline unchanged.
 def test_s1_s4_unknown_application_returns_404_and_changes_nothing():
     pid = _pid()
     existing = _apply(pid)
@@ -61,8 +61,8 @@ def test_s1_s4_unknown_application_returns_404_and_changes_nothing():
     assert before["Applied"] == [existing]
 
 
-# S-1.md D2: validation runs before the lookup, so a bad body on an unknown application_id is
-# 422, not 404; §6: a stage name in the wrong case ("screened") is 422.
+# S-1.md §8 D2: validation runs before the lookup, so a bad body on an unknown application_id is
+# 422, not 404; §7: a stage name in the wrong case ("screened") is 422.
 def test_s1_d2_bad_body_on_unknown_application_is_422_not_404():
     unknown = f"no-such-application-{uuid.uuid4().hex}"
 
