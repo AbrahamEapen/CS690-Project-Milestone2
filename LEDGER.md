@@ -1308,3 +1308,24 @@ checks:    python -m pytest → 159 passed; coverage gate 99.01% (unchanged; the
            already run by other tests, this pins its behaviour for the empty case)
 evidence:  S-1 §4, §5, §7
 risk:      None new.
+
+## Entry 67
+artifact:  pyproject.toml ([tool.coverage.run] patch = ["subprocess"])
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; coverage 7.17.4,
+           pytest-cov 7.1.0; requested by Ketan Verma
+prompts:   measure the demo-seed subprocess in coverage; prompts/m2_repo_review_prompt.md
+           (further test and review work, item 3)
+review:    MILESTONE2.md §5d explains that api.py line 26 (seed_demo under JOBSBOARD_DEMO=1) runs
+           only inside the subprocess started by test_d13_demo_env_1_serves_plan_table_over_http,
+           which coverage did not measure. pytest-cov 7 no longer measures subprocesses itself;
+           coverage's own patch = ["subprocess"] (coverage >= 7.10, which pytest-cov 7.1.0
+           already requires) does. This is a configuration change only: no test or source file
+           changed, and fail_under stays 80. The subprocess inherits the parent environment
+           (the test copies os.environ), so coverage starts in it.
+checks:    full test command → 159 passed, Total coverage: 100.00% (api.py, ranking.py,
+           ranking_store.py all 100%, no missing lines or partial branches); python -m pytest -q
+           without --cov → 159 passed; no stray .coverage.* files left after the run
+evidence:  MILESTONE2.md §5d; docs/reviews/2026-11-20-repo-review.md C5
+risk:      If a later test starts a subprocess with a cleaned environment, coverage will not run
+           in it. Coverage of the subprocess depends on coverage >= 7.10, pinned indirectly
+           through pytest-cov==7.1.0.

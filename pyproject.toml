@@ -1,5 +1,10 @@
 # Test configuration for CS690 Milestone 2 (S-3). pytest settings stay in pytest.ini.
 
+[tool.coverage.run]
+# Measure the JOBSBOARD_DEMO=1 subprocess in test_d13_demo_env_1_serves_plan_table_over_http, so
+# api.py's seed_demo line counts (coverage >= 7.10; MILESTONE2.md §5d, LEDGER entry 67).
+patch = ["subprocess"]
+
 [tool.coverage.report]
 # Deliverable 5d: the README test command fails below 80 percent coverage of the story code.
 fail_under = 80
