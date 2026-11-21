@@ -1202,3 +1202,22 @@ evidence:  Deliverable 9; docs/reviews/2026-11-20-repo-review.md R1, R4
 risk:      The statement names no specific commits or ledger entries for Ketan's test runs and
            his 2026-11-18 review, because none were given; a grader may ask for them. Unsigned until
            Ketan signs. Aditya Pothuri's statement is still missing.
+
+## Entry 61
+artifact:  tests/integration/test_s1_error_paths.py (new):
+           test_s1_s4_blank_applicant_id_returns_422_and_adds_nothing ("" and "   ")
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma.
+           Written by the main agent, not the test-writer subagent: this claude.ai session does not
+           load .claude/agents/ (AGENTS.md asks for test-writer)
+prompts:   summarize the test runs and raise coverage, following the Milestone 1 design doc;
+           one commit per test; prompts/m2_repo_review_prompt.md (test coverage follow-up)
+review:    Ketan asked whether the tests follow the Milestone 1 design doc before approving them.
+           Expected values come from S-1.md, not from the code: §4 "422 if applicant_id is
+           missing, blank, or not a string", §5 applicant_id non-empty, R4 "a 404, 409, or 422
+           leaves the pipeline unchanged". The test checks the status and that the pipeline is
+           unchanged; it does not pin the 422 body, which D2 leaves to FastAPI's default (entry 5
+           risk). Fault check: with the blank check in api.py disabled, both cases fail.
+checks:    full test command → 156 passed; coverage gate 97.54% → 98.52%; api.py line 36 now
+           covered (missing 26, 47)
+evidence:  S-1 §4, §5 R4; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
+risk:      The 422 body is still unpinned by design (D2); a FastAPI upgrade could change it unseen.

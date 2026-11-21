@@ -8,3 +8,10 @@
 
 ## How the session got the code
 Claude's GitHub connection (account `kverma19863020`) could not open the private repository, so Ketan uploaded the GitHub ZIP of `main` (`aff2104`). The ZIP has no git history; the work was committed on a fresh local repository and handed back as a patch series for Ketan to apply and push.
+
+## Test coverage follow-up, verbatim (2026-11-20)
+> can you give me summary of tests runs and if i can increase test coverage
+
+> but does this follow the milestone 1 design requirement doc
+
+> please add these tests in different commits , give me step by step command to update repo via terminal commands
