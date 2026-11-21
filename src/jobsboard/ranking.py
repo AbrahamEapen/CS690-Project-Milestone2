@@ -104,7 +104,7 @@ def _missing_required(required_skills: Iterable[str], skills: Iterable[str]) -> 
     return tuple(sorted(missing, key=_spelling_order))
 
 
-def rank_applicants(required_skills: frozenset[str], candidates: list[Candidate]) -> list[RankedEntry]:
+def rank_applicants(required_skills: Iterable[str], candidates: Iterable[Candidate]) -> list[RankedEntry]:
     # D3, D10: validate all input before ranking, raising the first problem in this order:
     # required skills, then each candidate in list order (duplicate ID, fit score, skills).
     required = validate_skills(required_skills)

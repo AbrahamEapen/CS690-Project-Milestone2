@@ -1147,3 +1147,20 @@ evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverables 7 and 9
 risk:      The ZIP carries no tags or history, so m2-tests-locked and m2-green and the commit SHAs
            in entries 25-56 were not re-checked. The review is one model pass; C3 (non-iterable
            skills raise TypeError) needs a team decision in D10.
+
+## Entry 58
+artifact:  src/jobsboard/api.py (docstring), src/jobsboard/ranking.py (rank_applicants type
+           hints), AGENTS.md (new workflow rule 0)
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   apply the low-risk fixes from the review; prompts/m2_repo_review_prompt.md
+review:    Ketan chose three review findings to fix. C1: the api.py docstring now names S-3 as
+           well as S-1. C2: rank_applicants takes Iterable[str] and Iterable[Candidate], matching
+           D10 ("any iterable is accepted"); behaviour is unchanged. R6: AGENTS.md gains rule 0,
+           start the session in the repo root, the lesson from the MILESTONE2.md reflection. No
+           test was added or changed, and tests/acceptance/ was not touched. C3 (non-iterable
+           skills) and C4 (no locking) were not changed; they need a team decision.
+checks:    python -m pytest --cov=... --cov-fail-under=80 → 154 passed, 97.54% (unchanged);
+           git diff --stat → 3 files, +3 -2
+evidence:  S-3 D10; MILESTONE2.md Reflection; docs/reviews/2026-11-20-repo-review.md C1, C2, R6
+risk:      mutmut was not re-run; only annotations and a docstring changed in mutated files, so
+           the mutant count should be the same but is unverified.

@@ -27,6 +27,7 @@ mutmut run && mutmut results                             # mutation testing (Lin
 - `agent/`, `scripts/` — headless review schema and script. `.claude/agents/` — subagents.
 
 ## Workflow rules
+0. **Start in the repository root.** Launch Claude Code from the folder that holds `AGENTS.md`, so `CLAUDE.md`, `.claude/settings.json` and the `.claude/agents/` subagents load. If the session started anywhere else, exit and restart it there (MILESTONE2.md, Reflection).
 1. **Show a plan and wait.** Before editing any file, list the files you will change and what changes in each, then stop until a human team member approves.
 2. One bounded task at a time; a task implements one acceptance criterion from `docs/design/S-3.md`.
 3. Change only the files the task prompt names. Stop when the check it names passes.

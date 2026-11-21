@@ -1,4 +1,4 @@
-"""S-1 HTTP API (docs/design/S-1.md §4)."""
+"""S-1 and S-3 HTTP API (docs/design/S-1.md §4, docs/design/S-3.md §4)."""
 from __future__ import annotations
 
 import os
