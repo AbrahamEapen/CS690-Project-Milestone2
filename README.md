@@ -20,6 +20,15 @@ source .venv/bin/activate          # Windows PowerShell: .venv\Scripts\Activate.
 python -m pip install -r requirements.txt
 ```
 
+If the install stops with `Failed building wheel for libcst` (seen on an Intel Mac, 2026-11-20), pip found no prebuilt `libcst` for your Python and tried to build it with Rust. Only `mutmut` needs it, so the tests still run without it:
+
+```bash
+grep -v mutmut requirements.txt > /tmp/req-no-mutmut.txt
+python -m pip install -r /tmp/req-no-mutmut.txt
+```
+
+Install Rust from https://rustup.rs and rerun the full install if you need `mutmut run` on that machine; otherwise run mutation testing on Linux or WSL.
+
 ## Run all the tests (one command, with the coverage gate)
 
 ```bash

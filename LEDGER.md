@@ -1329,3 +1329,19 @@ evidence:  MILESTONE2.md §5d; docs/reviews/2026-11-20-repo-review.md C5
 risk:      If a later test starts a subprocess with a cleaned environment, coverage will not run
            in it. Coverage of the subprocess depends on coverage >= 7.10, pinned indirectly
            through pytest-cov==7.1.0.
+
+## Entry 68
+artifact:  README.md (Install: note for the libcst build failure)
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   note the Intel-Mac install problem in the README; prompts/m2_repo_review_prompt.md
+           (further test and review work, item 4)
+review:    On 2026-11-20 Ketan's fresh install on an Intel Mac failed: pip found no prebuilt
+           libcst (a mutmut dependency) and could not build it without a Rust compiler;
+           upgrading pip did not help. Installing requirements.txt without mutmut worked, and the
+           tests then ran. The README now says this, with the exact two commands Ketan used and
+           where to run mutmut instead. requirements.txt itself is unchanged (AGENTS.md: ask
+           before changing dependencies).
+checks:    the two commands are the ones Ketan ran successfully; the full test command was then
+           run and the result pushed (2c73fc9)
+evidence:  Ketan's install output, 2026-11-20; README "Install"
+risk:      Only seen on one Intel Mac; other platforms may hit it with other Python versions.

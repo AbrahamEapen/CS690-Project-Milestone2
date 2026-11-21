@@ -32,6 +32,6 @@ Every prompt referenced from `LEDGER.md` is stored here verbatim, at the path th
 | `s3_refactor.md` | Refactor after green | 49 |
 | `s3_test_strength_prompt.md` | test-writer unit, integration and property tests (5a–5c) | 51 |
 | `s3_mutant_kill_prompt.md` | Test that kills the surviving demo mutant | 53 |
-| `m2_repo_review_prompt.md` | Repository review, review fixes, ledger update, contribution statement and S-1 error-path tests | 57–63 |
+| `m2_repo_review_prompt.md` | Repository review, review fixes, ledger update, contribution statement, S-1 tests, mutation re-run, coverage and README fixes | 57–68 |
 
 Entries 32 (permission-denied proof) and 55 (headless review) cite no file here: entry 32's prompt is quoted in `evidence/permission-denied.md`, and entry 55's prompt is the `PROMPT` in `scripts/review_story.sh`.
