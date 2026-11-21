@@ -43,3 +43,19 @@ def test_s1_s4_blank_applicant_id_returns_422_and_adds_nothing(blank: str):
 
     assert resp.status_code == 422
     assert _stages(pid) == before
+
+
+# S-1.md §4: an unknown application_id returns 404 with this exact body; §6 lists it as an edge
+# case; R4: a 404 leaves the pipeline unchanged.
+def test_s1_s4_unknown_application_returns_404_and_changes_nothing():
+    pid = _pid()
+    existing = _apply(pid)
+    before = _stages(pid)
+    unknown = f"no-such-application-{uuid.uuid4().hex}"
+
+    resp = client.post(f"/applications/{unknown}/stage", json={"to_stage": "Screened"})
+
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": {"error": "application_not_found", "application_id": unknown}}
+    assert _stages(pid) == before
+    assert before["Applied"] == [existing]

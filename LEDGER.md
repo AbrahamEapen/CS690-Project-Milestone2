@@ -1221,3 +1221,20 @@ checks:    full test command → 156 passed; coverage gate 97.54% → 98.52%; ap
            covered (missing 26, 47)
 evidence:  S-1 §4, §5 R4; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
 risk:      The 422 body is still unpinned by design (D2); a FastAPI upgrade could change it unseen.
+
+## Entry 62
+artifact:  tests/integration/test_s1_error_paths.py:
+           test_s1_s4_unknown_application_returns_404_and_changes_nothing
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma;
+           main agent, not test-writer (see entry 61)
+prompts:   same as entry 61; prompts/m2_repo_review_prompt.md (test coverage follow-up)
+review:    Expected values from S-1.md §4: POST /applications/{id}/stage on an unknown id returns
+           404 {"detail": {"error": "application_not_found", "application_id": <id>}}; §6 lists
+           an unknown application_id as an edge case; R4: the pipeline is unchanged. The full 404
+           body is compared. Fault check: with the body's application_id changed in api.py, the
+           test fails.
+checks:    full test command → 157 passed; coverage gate 98.52% → 99.01%; api.py line 47 covered
+           (missing 26 only); pipeline.py, outside the gate, 93% → 100% (lines 31-32, 75-76)
+evidence:  S-1 §4, §5 R4, §6; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
+risk:      api.py line 26 (demo seed under JOBSBOARD_DEMO=1) is still only run in a subprocess
+           that pytest-cov does not measure.
