@@ -1126,3 +1126,24 @@ evidence:  S-3; AC-6..AC-8, AC-21..AC-23; §4 empty and error states; Deliverabl
 risk:      Swagger UI loads its JavaScript from a CDN, so recapturing needs network access. The
            screenshots show the API through Swagger, not a recruiter-facing page, because S-3
            has no UI in this milestone.
+
+## Entry 57
+artifact:  docs/reviews/2026-11-20-repo-review.md (new); prompts/m2_repo_review_prompt.md (new)
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   read the repo, summarize it, review it, and update the ledger with inputs, feedback and
+           contributions; prompts/m2_repo_review_prompt.md
+review:    Claude's GitHub connection could not open the private repo, so Ketan uploaded the
+           GitHub ZIP of main (aff2104); work was committed on a fresh local repo. The review read
+           all of src/jobsboard/, the test suites, MILESTONE2.md, LEDGER.md, prompts/ and
+           contribution/. No code bugs were found against S-3.md. It lists 5 code findings
+           (C1-C5, all Low or Info) and 6 repo findings (R1-R6); the highest is R1, missing
+           contribution statements for Ketan and Aditya. Ketan read the findings and chose to
+           act on C1, C2, R2, R3 and R6 and to supply his own contribution facts (R1); C3 and C4
+           are left for a team decision.
+checks:    python -m pytest --cov=... --cov-fail-under=80 (Python 3.13.18) → 154 passed,
+           97.54%, api.py missing 26, 36, 47, same as evidence/coverage.txt; every prompts/ path
+           cited in LEDGER.md exists (0 missing); all 56 earlier entries have seven fields
+evidence:  S-3; AC-6..AC-8, AC-21..AC-23; Deliverables 7 and 9
+risk:      The ZIP carries no tags or history, so m2-tests-locked and m2-green and the commit SHAs
+           in entries 25-56 were not re-checked. The review is one model pass; C3 (non-iterable
+           skills raise TypeError) needs a team decision in D10.
