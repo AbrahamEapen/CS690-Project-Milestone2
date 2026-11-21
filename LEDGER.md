@@ -1254,3 +1254,21 @@ checks:    full test command → 158 passed; coverage gate 99.01% (unchanged); w
 evidence:  S-1 D2, §6; docs/reviews/2026-11-20-repo-review.md C5
 risk:      MILESTONE2.md §5d and evidence/coverage.txt still show the 2026-11-15 numbers (154
            passed, 97.54%); they are the team's record of the milestone run and were not edited.
+
+## Entry 64
+artifact:  evidence/mutation-2026-11-20.txt (new)
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; mutmut 3.8.1 on Linux,
+           Python 3.13.18; requested by Ketan Verma
+prompts:   re-run mutation testing after the review changes; prompts/m2_repo_review_prompt.md
+           (further test and review work, item 1)
+review:    Entry 58's risk said mutmut was not re-run after the rank_applicants type-hint change.
+           Ketan's Mac cannot run mutmut (libcst needs a Rust compiler on Intel macOS), so the run
+           was done in Claude's Linux workspace on an exact copy of main at 05acde2 (git bundle
+           from Ketan's clone). Only the spinner lines were removed from the output; the counts
+           and survivor list are as printed. The 4 survivors are the same exception-message
+           mutants triaged as equivalent under D9 in MILESTONE2.md §5e.
+checks:    mutmut run → 158/158, killed 154, survived 4, timeout 0, suspicious 0; mutmut results
+           lists the same 4 mutants as evidence/mutation-after.txt
+evidence:  S-3; MILESTONE2.md §5e; entry 58 risk (now closed)
+risk:      Run on Linux, not on the team's machines; mutmut scope is still ranking.py and
+           ranking_store.py only (team decision, entry 50), so api.py and pipeline.py are not mutated.

@@ -15,3 +15,10 @@ Claude's GitHub connection (account `kverma19863020`) could not open the private
 > but does this follow the milestone 1 design requirement doc
 
 > please add these tests in different commits , give me step by step command to update repo via terminal commands
+
+## Further test and review work, verbatim (2026-11-20)
+> can anything else be contrinbuted and chaged from test,review perspective
+
+> do 1-4
+
+Items 1-4 offered: (1) re-run mutation testing; (2) test the empty-posting pipeline (S-1 §6); (3) measure the demo-seed subprocess in coverage; (4) note the Intel-Mac install problem in the README.

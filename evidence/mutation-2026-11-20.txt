@@ -1,0 +1,17 @@
+# mutmut re-run, 2026-11-20 (LEDGER entry 64)
+# at commit 05acde2 (after the entry 58 type-hint changes); Python 3.13.18, mutmut 3.8.1, [tool.mutmut] in pyproject.toml unchanged
+# command: mutmut run && mutmut results   (progress spinner lines removed; final counter line kept)
+
+    done in 327ms (2 files mutated, 3 ignored, 0 unmodified)
+    done
+    done
+    done
+Running mutation testing
+29.05 mutations/second
+⠦ 158/158  🎉 154 🫥 0  ⏰ 0  🤔 0  🙁 4  🔇 0  🧙 0
+
+--- mutmut results
+    jobsboard.ranking_store.xǁPostingNotFoundǁ__init____mutmut_1: survived
+    jobsboard.ranking.xǁInvalidFitScoreǁ__init____mutmut_1: survived
+    jobsboard.ranking.xǁDuplicateApplicationǁ__init____mutmut_1: survived
+    jobsboard.ranking.xǁInvalidSkillǁ__init____mutmut_1: survived
