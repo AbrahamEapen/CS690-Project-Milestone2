@@ -1128,7 +1128,8 @@ risk:      Swagger UI loads its JavaScript from a CDN, so recapturing needs netw
            has no UI in this milestone.
 
 ## Entry 57
-artifact:  docs/reviews/2026-11-20-repo-review.md (new); prompts/m2_repo_review_prompt.md (new)
+artifact:  docs/reviews/2026-11-20-repo-review.md (new); prompts/m2_repo_review_prompt.md (new);
+           commit 3f53eaf
 tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
 prompts:   read the repo, summarize it, review it, and update the ledger with inputs, feedback and
            contributions; prompts/m2_repo_review_prompt.md
@@ -1150,7 +1151,7 @@ risk:      The ZIP carries no tags or history, so m2-tests-locked and m2-green a
 
 ## Entry 58
 artifact:  src/jobsboard/api.py (docstring), src/jobsboard/ranking.py (rank_applicants type
-           hints), AGENTS.md (new workflow rule 0)
+           hints), AGENTS.md (new workflow rule 0); commit 6026c61
 tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
 prompts:   apply the low-risk fixes from the review; prompts/m2_repo_review_prompt.md
 review:    Ketan chose three review findings to fix. C1: the api.py docstring now names S-3 as
@@ -1166,7 +1167,8 @@ risk:      mutmut was not re-run; only annotations and a docstring changed in mu
            the mutant count should be the same but is unverified.
 
 ## Entry 59
-artifact:  prompts/README.md (Milestone 2 table); MILESTONE2.md §1a; review file wording
+artifact:  prompts/README.md (Milestone 2 table); MILESTONE2.md §1a; review file wording;
+           commit 9cc6024
 tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
 prompts:   index the Milestone 2 prompts and record the feedback check; prompts/m2_repo_review_prompt.md
 review:    The prompt index stopped at entry 24. Claude listed which prompts/ files each of
@@ -1179,3 +1181,24 @@ checks:    every file in prompts/ except README.md is now named in prompts/READM
            with a grep loop); every prompts/ path cited in LEDGER.md exists
 evidence:  Deliverables 1a and 7; docs/reviews/2026-11-20-repo-review.md R2, R3
 risk:      If Milestone 1 feedback arrives later, §1a and a new ledger entry must be updated again.
+
+## Entry 60
+artifact:  contribution/Ketan_Verma_contribution.md (new); MILESTONE2.md Team roles
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   draft my contribution statement from my answers; prompts/m2_repo_review_prompt.md
+review:    Ketan's facts, verbatim: "I did the test runs and checks of the agent and teamates
+           work, Did review abhram work and suggested changes"; and "Ketan Verma reviewed on
+           11/18/2026", recorded as the date of his review of Abraham's work. Claude drafted the
+           statement in
+           the format of Abraham's statement using only those facts and the verifiable work of
+           entries 57-59; it added no tasks, commits or findings Ketan did not give. Team roles
+           in MILESTONE2.md now names Ketan's part. The signature line is left blank for Ketan
+           to sign himself.
+checks:    statement has sections 1-3 and the confirmation line, matching
+           contribution/Abraham_Eapen_contribution.md; git log origin/main → 9cc6024, so
+           entries 57-59 (3f53eaf, 6026c61, 9cc6024) were pushed by Ketan before this entry;
+           their artifact lines now name those commits
+evidence:  Deliverable 9; docs/reviews/2026-11-20-repo-review.md R1, R4
+risk:      The statement names no specific commits or ledger entries for Ketan's test runs and
+           his 2026-11-18 review, because none were given; a grader may ask for them. Unsigned until
+           Ketan signs. Aditya Pothuri's statement is still missing.

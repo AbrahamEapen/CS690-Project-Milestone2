@@ -19,7 +19,7 @@ Repository: https://github.com/AbrahamEapen/CS690-Project-Milestone2. It starts 
 
 ## Team roles
 
-Abraham Eapen led the agent setup, the acceptance tests, the build, and the test-strength work. Everyone works with the agent.
+Abraham Eapen led the agent setup, the acceptance tests, the build, and the test-strength work. Everyone works with the agent. Ketan Verma ran the tests, checked the agent's and teammates' work, and reviewed Abraham's work on 2026-11-18 and suggested changes; he also ran the 2026-11-20 repository review (`docs/reviews/2026-11-20-repo-review.md`, LEDGER entries 57–60).
 
 ## 1. Follow-up, the story, and its open questions
 
