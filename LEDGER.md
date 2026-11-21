@@ -1291,3 +1291,20 @@ checks:    python -m pytest -q tests/integration/test_s1_error_paths.py → 4 pa
 evidence:  S-1 §4-§8; entries 61-63
 risk:      Commit messages 7f3bde3 (§4, R4), 6c1fe03 (§4, §6, R4) and 2c73fc9 (D2) keep the
            wrong §6 for edge cases; this entry is the correction of record.
+
+## Entry 66
+artifact:  tests/integration/test_s1_pipeline_view.py (new):
+           test_s1_s7_empty_posting_returns_all_five_stages_empty
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma;
+           main agent, not test-writer (see entry 61)
+prompts:   test the empty-posting pipeline; prompts/m2_repo_review_prompt.md (further test and
+           review work, item 2)
+review:    S-1.md §7 lists "an empty posting (all five keys present)" as an edge case, and no test
+           checked it: every existing pipeline assertion had at least one application. Expected
+           value from §4 (response shape, five stage keys) and §5 (any posting ID is valid; no
+           posting entity until S-6). The whole JSON body is compared. Fault check: with api.py
+           building the stages dict empty instead of from Stage, the test fails.
+checks:    python -m pytest → 159 passed; coverage gate 99.01% (unchanged; the code path was
+           already run by other tests, this pins its behaviour for the empty case)
+evidence:  S-1 §4, §5, §7
+risk:      None new.
