@@ -59,3 +59,13 @@ def test_s1_s4_unknown_application_returns_404_and_changes_nothing():
     assert resp.json() == {"detail": {"error": "application_not_found", "application_id": unknown}}
     assert _stages(pid) == before
     assert before["Applied"] == [existing]
+
+
+# S-1.md D2: validation runs before the lookup, so a bad body on an unknown application_id is
+# 422, not 404; §6: a stage name in the wrong case ("screened") is 422.
+def test_s1_d2_bad_body_on_unknown_application_is_422_not_404():
+    unknown = f"no-such-application-{uuid.uuid4().hex}"
+
+    resp = client.post(f"/applications/{unknown}/stage", json={"to_stage": "screened"})
+
+    assert resp.status_code == 422

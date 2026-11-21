@@ -1238,3 +1238,19 @@ checks:    full test command → 157 passed; coverage gate 98.52% → 99.01%; ap
 evidence:  S-1 §4, §5 R4, §6; docs/reviews/2026-11-20-repo-review.md C5; MILESTONE2.md §5d
 risk:      api.py line 26 (demo seed under JOBSBOARD_DEMO=1) is still only run in a subprocess
            that pytest-cov does not measure.
+
+## Entry 63
+artifact:  tests/integration/test_s1_error_paths.py:
+           test_s1_d2_bad_body_on_unknown_application_is_422_not_404
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma;
+           main agent, not test-writer (see entry 61)
+prompts:   same as entry 61; prompts/m2_repo_review_prompt.md (test coverage follow-up)
+review:    Expected value from S-1.md D2, "validation ... runs before the lookup (404)", and §6,
+           a wrong-case stage name ("screened") is 422. So an unknown id with a bad body must be
+           422, not 404. This test adds no coverage; it pins an ordering rule the doc states and
+           no earlier test checked.
+checks:    full test command → 158 passed; coverage gate 99.01% (unchanged); whole package
+           (--cov=jobsboard) 96% → 99%
+evidence:  S-1 D2, §6; docs/reviews/2026-11-20-repo-review.md C5
+risk:      MILESTONE2.md §5d and evidence/coverage.txt still show the 2026-11-15 numbers (154
+           passed, 97.54%); they are the team's record of the milestone run and were not edited.
