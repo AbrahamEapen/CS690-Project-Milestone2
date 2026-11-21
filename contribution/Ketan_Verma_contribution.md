@@ -34,4 +34,4 @@ I confirm that this statement is accurate, and that I can explain any part of th
 
 *Drafted with Claude (Claude Opus 5.5) from my answers; content provided by me.*
 
-**Signature:** _______________  **Date:** 2026-11-20
+**Signature:** /s/ Ketan Verma  **Date:** 2026-11-20
