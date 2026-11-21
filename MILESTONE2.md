@@ -25,7 +25,7 @@ Abraham Eapen led the agent setup, the acceptance tests, the build, and the test
 
 ### 1a. Milestone 1 follow-up
 
-No items as of 2026-11-15.
+No Milestone 1 feedback items had been received as of 2026-11-20 (checked by Ketan Verma; earlier check 2026-11-15).
 
 The Milestone 1 repository was `ap3478/CS690-Project`. Milestone 2 continues in a new repository, so commit SHAs in the Milestone 1 ledger refer to the old repository.
 

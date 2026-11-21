@@ -1164,3 +1164,18 @@ checks:    python -m pytest --cov=... --cov-fail-under=80 → 154 passed, 97.54%
 evidence:  S-3 D10; MILESTONE2.md Reflection; docs/reviews/2026-11-20-repo-review.md C1, C2, R6
 risk:      mutmut was not re-run; only annotations and a docstring changed in mutated files, so
            the mutant count should be the same but is unverified.
+
+## Entry 59
+artifact:  prompts/README.md (Milestone 2 table); MILESTONE2.md §1a; review file wording
+tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
+prompts:   index the Milestone 2 prompts and record the feedback check; prompts/m2_repo_review_prompt.md
+review:    The prompt index stopped at entry 24. Claude listed which prompts/ files each of
+           entries 25-56 cites (script over LEDGER.md) and added one table row per file or task
+           group, plus a note that entries 32 and 55 keep their prompts in
+           evidence/permission-denied.md and scripts/review_story.sh. Ketan confirmed that no
+           Milestone 1 feedback has been received, so §1a now says so with today's date instead
+           of being left at 2026-11-15. No ledger entry was edited.
+checks:    every file in prompts/ except README.md is now named in prompts/README.md (checked
+           with a grep loop); every prompts/ path cited in LEDGER.md exists
+evidence:  Deliverables 1a and 7; docs/reviews/2026-11-20-repo-review.md R2, R3
+risk:      If Milestone 1 feedback arrives later, §1a and a new ledger entry must be updated again.

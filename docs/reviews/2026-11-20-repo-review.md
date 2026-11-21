@@ -30,7 +30,7 @@ No correctness bugs were found. Ranking (R3/R4/D2), the minimum flag (R1/R2), sy
 | # | Severity | Where | Finding | Suggested action |
 | --- | --- | --- | --- | --- |
 | R1 | High (grading) | `contribution/` | Deliverable 9 asks for "one signed statement per member", but only `Abraham_Eapen_contribution.md` / `.pdf` exist. Ketan Verma's and Aditya Pothuri's are missing. | Each member writes and signs their own; the content must come from them. |
-| R2 | Medium | `prompts/README.md` | The index stops at ledger entry 24 (Milestone 1). About 26 Milestone 2 prompt files (entries 25–56) are not listed. | Add the Milestone 2 rows (done in this session's ledger commit, entry 58). |
+| R2 | Medium | `prompts/README.md` | The index stops at ledger entry 24 (Milestone 1). The 18 Milestone 2 prompt files (entries 25–56) are not listed. | Add the Milestone 2 rows (done in this session, ledger entry 59). |
 | R3 | Medium | `MILESTONE2.md` §1a | "No items as of 2026-11-15." If Milestone 1 feedback has arrived since, this section is out of date. | Add each feedback item with what was changed (needs the actual feedback). |
 | R4 | Low | `LEDGER.md` | Every Milestone 2 entry (25–56) names Abraham as the human reviewer. Nothing records what Ketan or Aditya did in Milestone 2, which weakens the "everyone works with the agent" claim in `MILESTONE2.md` (Team roles). | Add entries for teammates' real reviews or decisions, if any; otherwise state the split of work honestly in Team roles. |
 | R5 | Low | `MILESTONE2.md` | Section order is 5f, 5b, 5d, 5e; 5a and 5c are only mentioned through ledger entries. | Reorder to 5a–5f, or add one-line 5a/5c pointers to `tests/unit/` and `tests/property/`. |
