@@ -1330,7 +1330,7 @@ risk:      If a later test starts a subprocess with a cleaned environment, cover
            in it. Coverage of the subprocess depends on coverage >= 7.10, pinned indirectly
            through pytest-cov==7.1.0.
 
-## Entry 68
+## Entry 69
 artifact:  README.md (Install: note for the libcst build failure)
 tool:      Claude (claude.ai, Claude Opus 5.5, claude-opus-5-5), 2026-11-20; requested by Ketan Verma
 prompts:   note the Intel-Mac install problem in the README; prompts/m2_repo_review_prompt.md
@@ -1345,3 +1345,28 @@ checks:    the two commands are the ones Ketan ran successfully; the full test c
            run and the result pushed (2c73fc9)
 evidence:  Ketan's install output, 2026-11-20; README "Install"
 risk:      Only seen on one Intel Mac; other platforms may hit it with other Python versions.
+
+## Entry 70
+artifact:  Local dev environment fix (no code change). Covers running
+           src/jobsboard/api.py via `uvicorn jobsboard.api:app --app-dir src --reload`
+           after it failed with "[Errno 48] Address already in use" on port 8000.
+tool:      Claude (claude.ai), model Claude Opus 5.5 (claude-opus-5-5), used 2026-11-21
+prompts:   1. Pasted the uvicorn startup error and asked for help resolving it
+              -> prompts/<entry-n>-01-uvicorn-port-in-use.md
+           2. Asked for this ledger entry using Option 1 (kill the process on port 8000)
+              -> prompts/<entry-n>-02-ledger-entry.md
+review:    Read the AI's diagnosis: port 8000 was still held by an earlier
+           uvicorn process (Errno 48 = EADDRINUSE on macOS). The AI gave two options:
+           (1) find and kill the process holding port 8000, or (2) run on --port 8001.
+           Accepted Option 1, because it keeps the default port that the project
+           and its docs/clients expect, and it removes a stale server instead of
+           leaving it running in the background.
+           Rejected Option 2: it hides the stale process and changes the URL.
+           Before killing, confirmed with lsof that the process was Python/uvicorn
+           and not an unrelated service. No source files were changed.
+checks:    $ lsof -i :8000
+            COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+com.docke 47515   ga  111u  IPv4 0xa0e005b0ae88a101      0t0  TCP localhost:irdmi (LISTEN)
+ga@Adityas-MacBook-Pro cs690-project-milestone2 % kill 47515
+evidence:  Rer-ran the unicorn without any errors
+risk:      Check Port assignments to ensure there are no conflicts. 
